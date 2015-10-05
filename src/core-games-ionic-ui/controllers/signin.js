@@ -1,5 +1,6 @@
 'use strict';
 
+//  TODO - tests
 angular.module('coreGamesIonicUi.controllers')
     .controller('CoreIonicSignInCtrl',
     ['$scope', '$window', '$http', '$state', '$cacheFactory', 'jtbFacebook', 'ENV', '$ionicLoading',

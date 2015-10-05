@@ -1,5 +1,6 @@
 'use strict';
 
+//  TODO - tests
 angular.module('coreGamesIonicUi.controllers')
     .controller('CoreIonicSignedInCtrl',
     ['$scope', '$state', '$rootScope', '$cacheFactory',
