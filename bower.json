@@ -1,0 +1,33 @@
+{
+  "name": "core-games-ionic-ui",
+  "version": "0.1.0",
+  "authors": [
+    {
+      "name": "JTB Development",
+      "email": "jtbdevelopment@gmail.com"
+    }
+  ],
+  "main": [
+    "dist/core-games-ionic-ui.js"
+  ],
+  "ignore": [
+    "src",
+    "test",
+    "gulpfile.js",
+    "karma-*.conf.js",
+    "**/.*"
+  ],
+  "dependencies": {
+    "ionic": "driftyco/ionic-bower#1.1.0",
+    "jtb-core-games-ui": "~1.0.3",
+    "ngCordova": "v0.1.14-alpha"
+  },
+  "devDependencies": {
+    "angular-mocks": ">=1.2.0",
+    "angular-scenario": ">=1.2.0",
+    "angular": ">=1.2.0"
+  },
+  "resolutions": {
+    "angular": "~1.4.0"
+  }
+}

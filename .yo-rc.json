@@ -1,0 +1,31 @@
+{
+  "generator-angularjs-library": {
+    "props": {
+      "author": {
+        "name": "JTB Development",
+        "email": "jtbdevelopment@gmail.com"
+      },
+      "libraryName": {
+        "original": "core-games-ionic-ui",
+        "camelized": "coreGamesIonicUi",
+        "dasherized": "core-games-ionic-ui",
+        "slugified": "core-games-ionic-ui",
+        "parts": [
+          "core",
+          "games",
+          "ionic",
+          "ui"
+        ]
+      },
+      "includeModuleDirectives": false,
+      "includeModuleFilters": false,
+      "includeModuleServices": true,
+      "includeAngularModuleResource": false,
+      "includeAngularModuleCookies": false,
+      "includeAngularModuleSanitize": false,
+      "librarySrcDirectory": "src/core-games-ionic-ui",
+      "libraryUnitTestDirectory": "test/unit/core-games-ionic-ui",
+      "libraryUnitE2eDirectory": "test/e2e/core-games-ionic-ui"
+    }
+  }
+}
