@@ -19,7 +19,8 @@
           'ngCordova',
           'coreGamesUi',
           'coreGamesIonicUi.config',
-          'coreGamesIonicUi.services'
+          'coreGamesIonicUi.services',
+          'coreGamesIonicUi.controllers'
       ]);
 
 })(angular);
@@ -74,6 +75,7 @@ angular.module('coreGamesIonicUi.controllers')
 );
 'use strict';
 
+//  TODO - tests
 angular.module('coreGamesIonicUi.controllers')
     .controller('CoreIonicSignedInCtrl',
     ['$scope', '$state', '$rootScope', '$cacheFactory',
@@ -99,6 +101,7 @@ angular.module('coreGamesIonicUi.controllers')
 );
 'use strict';
 
+//  TODO - tests
 angular.module('coreGamesIonicUi.controllers')
     .controller('CoreIonicSignInCtrl',
     ['$scope', '$window', '$http', '$state', '$cacheFactory', 'jtbFacebook', 'ENV', '$ionicLoading',

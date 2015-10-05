@@ -19,7 +19,8 @@
           'ngCordova',
           'coreGamesUi',
           'coreGamesIonicUi.config',
-          'coreGamesIonicUi.services'
+          'coreGamesIonicUi.services',
+          'coreGamesIonicUi.controllers'
       ]);
 
 })(angular);
