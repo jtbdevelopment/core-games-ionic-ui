@@ -6,7 +6,7 @@ angular.module('coreGamesIonicUi.controllers')
     ['$scope', '$window', '$http', '$state', '$cacheFactory', 'jtbFacebook', 'ENV', '$ionicLoading',
         function ($scope, $window, $http, $state, $cacheFactory, jtbFacebook, ENV, $ionicLoading) {
             //  TODO - Make this a popup on error I think
-            $scope.message = 'Initializing...';
+            $scope.message = '';
             $scope.showFacebook = false;
             $scope.showManual = false;
 
