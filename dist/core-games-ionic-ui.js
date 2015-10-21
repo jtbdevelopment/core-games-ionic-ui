@@ -31,7 +31,6 @@ angular.module('coreGamesIonicUi.controllers')
     .controller('CoreIonicNetworkCtrl',
     ['$scope', '$state', '$cordovaNetwork', '$timeout', '$window', 'ENV',
         function ($scope, $state, $cordovaNetwork, $timeout, $window, ENV) {
-
             function online() {
                 $state.go('signin');
             }
@@ -75,7 +74,6 @@ angular.module('coreGamesIonicUi.controllers')
 );
 'use strict';
 
-//  TODO - tests
 angular.module('coreGamesIonicUi.controllers')
     .controller('CoreIonicSignedInCtrl',
     ['$scope', '$state', '$rootScope', '$cacheFactory',
@@ -161,7 +159,7 @@ angular.module('coreGamesIonicUi.controllers')
 
             function showLoginOptions() {
                 $scope.showFacebook = true;
-                $scope.showManual = ENV.domain === 'localhost' || ENV.domain.href.indexOf('-dev') > -1;
+                $scope.showManual = ENV.domain === 'localhost' || ENV.apiEndpoint.indexOf('-dev') > -1;
                 $scope.message = '';
             }
 

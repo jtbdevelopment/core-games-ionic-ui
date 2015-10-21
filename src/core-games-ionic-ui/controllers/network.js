@@ -4,7 +4,6 @@ angular.module('coreGamesIonicUi.controllers')
     .controller('CoreIonicNetworkCtrl',
     ['$scope', '$state', '$cordovaNetwork', '$timeout', '$window', 'ENV',
         function ($scope, $state, $cordovaNetwork, $timeout, $window, ENV) {
-
             function online() {
                 $state.go('signin');
             }

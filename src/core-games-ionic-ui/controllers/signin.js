@@ -60,7 +60,7 @@ angular.module('coreGamesIonicUi.controllers')
 
             function showLoginOptions() {
                 $scope.showFacebook = true;
-                $scope.showManual = ENV.domain === 'localhost' || ENV.domain.href.indexOf('-dev') > -1;
+                $scope.showManual = ENV.domain === 'localhost' || ENV.apiEndpoint.indexOf('-dev') > -1;
                 $scope.message = '';
             }
 
