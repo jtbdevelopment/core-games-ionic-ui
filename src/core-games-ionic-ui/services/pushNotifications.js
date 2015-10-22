@@ -40,11 +40,11 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
             }
 
             function handleAndroidEvent(event, notification) {
-                switch (event.event) {
+                switch (notification.event) {
                     case 'registered':
                         if (notification.regid.length > 0) {
-                            console.log('registered cb ' + event.regid);
-                            registerToken(event.regid);
+                            console.log('registered cb ' + notification.regid);
+                            registerToken(notification.regid);
                         } else {
                             console.error('bad registered cb ' + JSON.stringify(notification));
                         }
@@ -83,7 +83,6 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
             }
 
             $rootScope.$on('$cordovaPush:notificationReceived', function (event, notification) {
-                console.log('notification event ' + JSON.stringify(event));
                 console.log('notification notification ' + JSON.stringify(notification));
                 if (angular.isDefined(notification) && angular.isDefined(notification.event)) {
                     handleAndroidEvent(event, notification);
