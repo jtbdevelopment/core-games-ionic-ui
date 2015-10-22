@@ -21,37 +21,44 @@ var rootDirectory = path.resolve('./');
 
 // Source directory for build process
 var sourceDirectory = path.join(rootDirectory, './src');
+var testDirectory = path.join(rootDirectory, './test');
 
 var sourceFiles = [
 
-  // Make sure module files are handled first
-  path.join(sourceDirectory, '/**/*.module.js'),
+    // Make sure module files are handled first
+    path.join(sourceDirectory, '/**/*.module.js'),
 
-  // Then add all JavaScript files
-  path.join(sourceDirectory, '/**/*.js')
+    // Then add all JavaScript files
+    path.join(sourceDirectory, '/**/*.js')
+];
+
+var testFiles = [
+
+    // Then add all JavaScript files
+    path.join(testDirectory, '/**/*.js')
 ];
 
 var lintFiles = [
-  'gulpfile.js',
-  // Karma configuration
-  'karma-*.conf.js'
+    'gulpfile.js',
+    // Karma configuration
+    'karma-*.conf.js'
 ].concat(sourceFiles);
 
-gulp.task('build', function() {
-  gulp.src(sourceFiles)
-    .pipe(plumber())
-    .pipe(concat('core-games-ionic-ui.js'))
-    .pipe(gulp.dest('./dist/'))
-    .pipe(uglify())
-    .pipe(rename('core-games-ionic-ui.min.js'))
-    .pipe(gulp.dest('./dist'));
+gulp.task('build', function () {
+    gulp.src(sourceFiles)
+        .pipe(plumber())
+        .pipe(concat('core-games-ionic-ui.js'))
+        .pipe(gulp.dest('./dist/'))
+        .pipe(uglify())
+        .pipe(rename('core-games-ionic-ui.min.js'))
+        .pipe(gulp.dest('./dist'));
 });
 
 /**
  * Process
  */
 gulp.task('process-all', function (done) {
-  runSequence('jshint', 'test-src', 'build', done);
+    runSequence('jshint', 'test-src', 'build', done);
 });
 
 /**
@@ -59,53 +66,54 @@ gulp.task('process-all', function (done) {
  */
 gulp.task('watch', function () {
 
-  // Watch JavaScript files
-  gulp.watch(sourceFiles, ['process-all']);
+    // Watch JavaScript files
+    gulp.watch(sourceFiles, ['process-all']);
+    gulp.watch(testFiles, ['process-all']);
 });
 
 /**
  * Validate source JavaScript
  */
 gulp.task('jshint', function () {
-  return gulp.src(lintFiles)
-    .pipe(plumber())
-    .pipe(jshint())
-    .pipe(jshint.reporter('jshint-stylish'))
-    .pipe(jshint.reporter('fail'));
+    return gulp.src(lintFiles)
+        .pipe(plumber())
+        .pipe(jshint())
+        .pipe(jshint.reporter('jshint-stylish'))
+        .pipe(jshint.reporter('fail'));
 });
 
 /**
  * Run test once and exit
  */
 gulp.task('test-src', function (done) {
-  karma.start({
-    configFile: __dirname + '/karma-src.conf.js',
-    singleRun: true
-  }, done);
+    karma.start({
+        configFile: __dirname + '/karma-src.conf.js',
+        singleRun: true
+    }, done);
 });
 
 /**
  * Run test once and exit
  */
 gulp.task('test-dist-concatenated', function (done) {
-  karma.start({
-    configFile: __dirname + '/karma-dist-concatenated.conf.js',
-    singleRun: true
-  }, done);
+    karma.start({
+        configFile: __dirname + '/karma-dist-concatenated.conf.js',
+        singleRun: true
+    }, done);
 });
 
 /**
  * Run test once and exit
  */
 gulp.task('test-dist-minified', function (done) {
-  karma.start({
-    configFile: __dirname + '/karma-dist-minified.conf.js',
-    singleRun: true
-  }, done);
+    karma.start({
+        configFile: __dirname + '/karma-dist-minified.conf.js',
+        singleRun: true
+    }, done);
 });
 
 gulp.task('default', function () {
-  runSequence('process-all', 'watch');
+    runSequence('process-all', 'watch');
 });
 
 /**
@@ -123,27 +131,27 @@ gulp.task('default', function () {
  */
 
 function inc(importance) {
-  // get all the files to bump version in
-  return gulp.src(['./package.json', './bower.json'])
-    // bump the version number in those files
-      .pipe(bump({type: importance}))
-    // save it back to filesystem
-      .pipe(gulp.dest('./'))
-    // commit the changed version number
-      .pipe(git.commit('bumps package version'))
+    // get all the files to bump version in
+    return gulp.src(['./package.json', './bower.json'])
+        // bump the version number in those files
+        .pipe(bump({type: importance}))
+        // save it back to filesystem
+        .pipe(gulp.dest('./'))
+        // commit the changed version number
+        .pipe(git.commit('bumps package version'))
 
-    // read only one file to get the version number
-      .pipe(filter('package.json'))
-    // **tag it in the repository**
-      .pipe(tagVersion());
+        // read only one file to get the version number
+        .pipe(filter('package.json'))
+        // **tag it in the repository**
+        .pipe(tagVersion());
 }
 
 gulp.task('patch', function () {
-  return inc('patch');
+    return inc('patch');
 });
 gulp.task('feature', function () {
-  return inc('minor');
+    return inc('minor');
 });
 gulp.task('release', function () {
-  return inc('major');
+    return inc('major');
 });
