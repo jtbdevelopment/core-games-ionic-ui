@@ -43,8 +43,8 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
                 switch (event.event) {
                     case 'registered':
                         if (notification.regid.length > 0) {
-                            console.log('registered cb ' + notification.regid);
-                            registerToken(notification.regid);
+                            console.log('registered cb ' + event.regid);
+                            registerToken(event.regid);
                         } else {
                             console.error('bad registered cb ' + JSON.stringify(notification));
                         }
@@ -83,7 +83,9 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
             }
 
             $rootScope.$on('$cordovaPush:notificationReceived', function (event, notification) {
-                if (angular.isDefined(event.event)) {
+                console.log('notification event ' + JSON.stringify(event));
+                console.log('notification notification ' + JSON.stringify(notification));
+                if (angular.isDefined(notification) && angular.isDefined(notification.event)) {
                     handleAndroidEvent(event, notification);
                 } else {
                     handleIOSEvent(notification);
@@ -110,7 +112,7 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
                             };
                         }
                         cordovaPush.register(config).then(function (token) {
-                            if (angular.isDefined(token) && token.length > 0) {
+                            if (angular.isDefined(token) && token.length > 0 && token !== 'OK') {
                                 console.log('Push Token ' + token);
                                 registerToken(token);
                             }
