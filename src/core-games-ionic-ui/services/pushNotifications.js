@@ -19,23 +19,32 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
             var deviceToken;
 
             function registerToken(token) {
-                if (angular.isDefined(token) && token != null && token.length > 0) {
+                console.log('register token called with ' + JSON.stringify(token));
+                if (angular.isDefined(token) && token != null && token.length > 0 && token !== 'OK') {
+                    console.log('Checking..');
                     var keyBase = 'push-' + jtbPlayerService.currentPlayer().md5;
                     var keyToken = keyBase + '-token';
                     var keyRegistered = keyBase + '-last';
                     var lastToken = jtbLocalStorage.get(keyToken, '');
-                    var lastReg = new Date(parseInt(jtbLocalStorage.get(keyRegistered, '0'))) - new Date();
-                    if (lastReg > WEEK_IN_MILLIS || token !== lastToken) {
+                    var lastReg = new Date(parseInt(jtbLocalStorage.get(keyRegistered, '0')));
+                    console.log('Last reg ' + lastReg.toLocaleString());
+                    var lastRegDiff = lastReg - new Date();
+                    if (lastRegDiff > WEEK_IN_MILLIS || token !== lastToken) {
+                        console.log('Registering');
                         $http.put('/api/notifications/register/' + token).success(function () {
                             jtbLocalStorage.set(keyToken, token);
-                            jtbLocalStorage.set(keyRegistered, new Date().getMilliseconds());
+                            jtbLocalStorage.set(keyRegistered, new Date().getTime());
                             deviceToken = token;
                             console.log('registered device');
                         }).error(function (error) {
                             console.error('failed to register device ' + JSON.stringify(error));
                             //  TODO
                         });
+                    } else {
+                        console.log('Recently registered.');
                     }
+                } else {
+                    console.log('Not registering');
                 }
             }
 
@@ -61,15 +70,15 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
                 }
             }
 
-            function handleIOSEvent(notification) {
+            function handleIOSEvent(event, notification) {
                 if (angular.isDefined(notification)) {
                     if (angular.isDefined(notification.alert)) {
                         navigator.notification.alert(notification.alert);
                     }
 
-                    if (angular.isDefined(notification.sound)) {
+                    if (angular.isDefined(event.sound)) {
                         //  TODO play sound
-                        console.log('play sound');
+                        console.log('play sound' + JSON.stringify(event.sound));
                     }
 
                     if (angular.isDefined(notification.badge)) {
@@ -83,11 +92,12 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
             }
 
             $rootScope.$on('$cordovaPush:notificationReceived', function (event, notification) {
+                //console.log('notification event ' + JSON.stringify(event));
                 console.log('notification notification ' + JSON.stringify(notification));
                 if (angular.isDefined(notification) && angular.isDefined(notification.event)) {
                     handleAndroidEvent(event, notification);
                 } else {
-                    handleIOSEvent(notification);
+                    handleIOSEvent(event, notification);
                 }
             });
 
@@ -103,7 +113,7 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
                                 senderID: id
                             };
                         } else {
-                            //  TODO
+                            //  TODO - review
                             config = {
                                 badge: true,
                                 sound: false,
@@ -111,15 +121,15 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
                             };
                         }
                         cordovaPush.register(config).then(function (token) {
-                            if (angular.isDefined(token) && token.length > 0 && token !== 'OK') {
-                                console.log('Push Token ' + token);
-                                registerToken(token);
-                            }
+                            console.log('Push Token ' + token);
+                            registerToken(token);
                         }, function (error) {
+                            console.log('Error registering ' + JSON.stringify(error));
                             //  TODO
                         });
                     }
                 }).error(function (error) {
+                    console.log('Not able to get senderID');
                     //  TODO
                 });
             });
@@ -131,4 +141,3 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
         }
     ]
 );
-
