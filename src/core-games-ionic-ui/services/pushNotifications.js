@@ -51,43 +51,39 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
                 registerToken(data.registrationId);
             }
 
-            var pushNotification, pushInstance;
-            try {
-                if ($window.location.href.indexOf('file:') === 0 && angular.isDefined($window.PushNotification)) {
-                    pushNotification = PushNotification;
-                }
-            } catch (ex) {
-                pushNotification = undefined;
-            }
+            var pushInstance;
 
             $rootScope.$on('playerLoaded', function () {
                 $http.get('/api/notifications/senderID').success(function (id) {
-                    if (angular.isDefined(pushNotification) && id !== 'NOTSET') {
-                        var config;
-                        //  TODO
-                        config = {
-                            android: {
-                                senderID: id,
-                                sound: false,
-                                vibrate: true
-                            },
-                            ios: {
-                                senderID: id,
-                                alert: true,
-                                badge: true,
-                                sound: false,
-                                clearBadge: true
-                            },
-                            windows: {
-
-                            }
-                        };
-                        pushInstance = pushNotification.init(config);
-                        pushInstance.on('registration', handleRegistration);
-                        pushInstance.on('notification', handleNotification);
-                        pushInstance.on('error', handleError);
+                    if (angular.isDefined(PushNotification) && id !== 'NOTSET') {
+                        if(angular.isDefined(pushInstance)) {
+                            console.log('Already registered for push');
+                        } else {
+                            var config;
+                            //  TODO
+                            config = {
+                                android: {
+                                    senderID: id,
+                                    sound: false,
+                                    vibrate: true
+                                },
+                                ios: {
+                                    senderID: id,
+                                    alert: true,
+                                    badge: true,
+                                    sound: false,
+                                    clearBadge: true
+                                },
+                                windows: {}
+                            };
+                            pushInstance = PushNotification.init(config);
+                            pushInstance.on('registration', handleRegistration);
+                            pushInstance.on('notification', handleNotification);
+                            pushInstance.on('error', handleError);
+                            console.log('Initial registration for push completed');
+                        }
                     } else {
-                        console.log('No pushNotification defined or sender id not set (senderId = ' + id + ')');
+                        console.log('No pushNotification defined or sender id not set (senderId = ' + id);
                     }
                 }).error(function (error) {
                     console.log('Not able to get senderID ' + JSON.stringify(error));
