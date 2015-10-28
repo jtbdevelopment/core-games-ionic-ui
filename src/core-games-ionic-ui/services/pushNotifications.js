@@ -67,12 +67,12 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
                         //  TODO
                         config = {
                             android: {
-                                senderId: id,
+                                senderID: id,
                                 sound: false,
                                 vibrate: true
                             },
                             ios: {
-                                senderId: id,
+                                senderID: id,
                                 alert: true,
                                 badge: true,
                                 sound: false,
