@@ -87,7 +87,7 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
                         pushInstance.on('notification', handleNotification);
                         pushInstance.on('error', handleError);
                     } else {
-                        console.log('No pushNotification defined');
+                        console.log('No pushNotification defined or sender id not set (senderId = ' + id + ')');
                     }
                 }).error(function (error) {
                     console.log('Not able to get senderID ' + JSON.stringify(error));
