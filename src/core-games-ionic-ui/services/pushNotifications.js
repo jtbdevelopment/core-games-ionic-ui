@@ -63,7 +63,7 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
 
             $rootScope.$on('playerLoaded', function () {
                 $http.get('/api/notifications/senderID').success(function (id) {
-                    if (angular.isDefined(PushNotification)) {
+                    if (angular.isDefined(window.PushNotification)) {
                         if(angular.isDefined(pushInstance)) {
                             console.log('Already registered for push, skipping');
                         } else {
