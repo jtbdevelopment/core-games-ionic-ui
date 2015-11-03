@@ -112,9 +112,8 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
                 });
             });
 
+            //  Service is automatic background
             return {
-                register: function () {
-                }
             };
         }
     ]
