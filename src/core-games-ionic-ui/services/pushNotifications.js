@@ -39,13 +39,15 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
             }
 
             function handleNotification(notification) {
-                if(angular.isDefined(notification.count) && angular.isDefined(PushNotification)) {
+                if (angular.isDefined(notification.count) && angular.isDefined(PushNotification)) {
                     try {
                         PushNotification.setApplicationIconBadgeNumber(
-                            function() {},
-                            function() {},
+                            function () {
+                            },
+                            function () {
+                            },
                             notification.count);
-                    } catch(ex) {
+                    } catch (ex) {
                         //
                     }
                 }
@@ -62,15 +64,14 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
             var pushInstance;
 
             $rootScope.$on('playerLoaded', function () {
-                $http.get('/api/notifications/senderID').success(function (id) {
-                    if (angular.isDefined(window.PushNotification)) {
-                        if(angular.isDefined(pushInstance)) {
-                            console.log('Already registered for push, skipping');
-                        } else {
-                            if (id !== 'NOTSET') {
-                                var config;
+                $http.get('/api/notifications/senderID', {cache: true}).success(function (id) {
+                    if (id !== 'NOTSET') {
+                        if (angular.isDefined(window.PushNotification)) {
+                            if (angular.isDefined(pushInstance)) {
+                                console.log('Already registered for push, skipping');
+                            } else {
                                 //  TODO
-                                config = {
+                                var config = {
                                     android: {
                                         senderID: id,
                                         sound: false,
@@ -99,11 +100,12 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
                                     $timeout(handleError(data));
                                 });
                                 console.log('Initial registration for push completed');
-                            } else {
-                                console.log('No sender id set (senderId = ' + id + ')');
                             }
+                        } else {
+                            console.log('No sender id set (senderId = ' + id + ')');
                         }
-                    } else {
+                    }
+                    else {
                         console.log('No PushNotification defined');
                     }
                 }).error(function (error) {
@@ -112,9 +114,9 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
                 });
             });
 
-            //  Service is automatic background
-            return {
-            };
+//  Service is automatic background
+            return {};
         }
     ]
-);
+)
+;
