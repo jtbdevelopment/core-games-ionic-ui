@@ -227,7 +227,7 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
                     var lastToken = jtbLocalStorage.get(keyToken, '');
                     var lastReg = new Date(parseInt(jtbLocalStorage.get(keyRegistered, '0')));
                     console.log('Last reg ' + lastReg.toLocaleString());
-                    var lastRegDiff = lastReg - new Date();
+                    var lastRegDiff = new Date() - lastReg;
                     if (lastRegDiff > WEEK_IN_MILLIS || token !== lastToken) {
                         console.log('Registering');
                         $http.put('/api/notifications/register/' + token).success(function () {
@@ -248,7 +248,7 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
             }
 
             function handleNotification(notification) {
-                if (angular.isDefined(notification.count) && angular.isDefined(PushNotification)) {
+                if (angular.isDefined(notification.count) && angular.isDefined(window.PushNotification)) {
                     try {
                         PushNotification.setApplicationIconBadgeNumber(
                             function () {
@@ -311,11 +311,11 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
                                 console.log('Initial registration for push completed');
                             }
                         } else {
-                            console.log('No sender id set (senderId = ' + id + ')');
+                            console.log('No PushNotification defined');
                         }
                     }
                     else {
-                        console.log('No PushNotification defined');
+                        console.log('No sender id set (senderId = ' + id + ')');
                     }
                 }).error(function (error) {
                     console.log('Not able to get senderID ' + JSON.stringify(error));
