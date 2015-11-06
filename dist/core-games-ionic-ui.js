@@ -99,7 +99,6 @@ angular.module('coreGamesIonicUi.controllers')
 );
 'use strict';
 
-//  TODO - tests
 angular.module('coreGamesIonicUi.controllers')
     .controller('CoreIonicSignInCtrl',
     ['$scope', '$window', '$http', '$state', '$cacheFactory', 'jtbFacebook', 'ENV', '$ionicLoading',
@@ -131,6 +130,7 @@ angular.module('coreGamesIonicUi.controllers')
                 $scope.message = 'Invalid username or password.';
             }
 
+            // Not testing since only used as a dev tool
             $scope.manualLogin = function () {
                 $ionicLoading.show({
                     template: 'Sending...'
