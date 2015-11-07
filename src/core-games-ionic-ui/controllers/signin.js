@@ -1,12 +1,11 @@
 'use strict';
 
-//  TODO - tests
 angular.module('coreGamesIonicUi.controllers')
     .controller('CoreIonicSignInCtrl',
     ['$scope', '$window', '$http', '$state', '$cacheFactory', 'jtbFacebook', 'ENV', '$ionicLoading',
         function ($scope, $window, $http, $state, $cacheFactory, jtbFacebook, ENV, $ionicLoading) {
             //  TODO - Make this a popup on error I think
-            $scope.message = 'Initializing...';
+            $scope.message = '';
             $scope.showFacebook = false;
             $scope.showManual = false;
 
@@ -32,6 +31,7 @@ angular.module('coreGamesIonicUi.controllers')
                 $scope.message = 'Invalid username or password.';
             }
 
+            // Not testing since only used as a dev tool
             $scope.manualLogin = function () {
                 $ionicLoading.show({
                     template: 'Sending...'
@@ -60,7 +60,7 @@ angular.module('coreGamesIonicUi.controllers')
 
             function showLoginOptions() {
                 $scope.showFacebook = true;
-                $scope.showManual = ENV.domain === 'localhost' || ENV.domain.href.indexOf('-dev') > -1;
+                $scope.showManual = ENV.domain === 'localhost' || ENV.apiEndpoint.indexOf('-dev') > -1;
                 $scope.message = '';
             }
 
