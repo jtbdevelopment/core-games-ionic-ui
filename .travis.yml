@@ -1,5 +1,12 @@
 language: node_js
 node_js: ["0.10"]
-before_script:
+install:
   - npm install -g bower
+  - npm install -g gulp
+  - npm install
+before_script:
   - bower install
+script:
+  - gulp test-src
+  - gulp test-dist-concatenated
+  - gulp test-dist-minified
