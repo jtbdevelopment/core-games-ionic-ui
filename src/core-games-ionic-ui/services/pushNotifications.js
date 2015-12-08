@@ -39,16 +39,17 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
             }
 
             function handleNotification(notification) {
-                if (angular.isDefined(notification.count) && angular.isDefined(window.PushNotification)) {
+                if (angular.isDefined(notification.count) && angular.isDefined(pushInstance)) {
                     try {
-                        PushNotification.setApplicationIconBadgeNumber(
+                        pushInstance.setApplicationIconBadgeNumber(
                             function () {
                             },
                             function () {
+                                console.log('Failed to set badge');
                             },
                             notification.count);
                     } catch (ex) {
-                        //
+                        //  expect failure on android
                     }
                 }
             }

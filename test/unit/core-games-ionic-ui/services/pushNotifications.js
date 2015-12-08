@@ -39,14 +39,14 @@ describe('Service: pushNotifications', function () {
         var expectedConfig = {};
         beforeEach(function () {
             pushInstance = {
-                on: jasmine.createSpy()
+                on: jasmine.createSpy(),
+                setApplicationIconBadgeNumber: jasmine.createSpy()
             };
             push = {
                 init: function (config) {
                     expect(config).toEqual(expectedConfig);
                     return pushInstance;
-                },
-                setApplicationIconBadgeNumber: jasmine.createSpy()
+                }
             };
             window.PushNotification = push;
         });
@@ -152,7 +152,8 @@ describe('Service: pushNotifications', function () {
                             case 'error':
                                 error = cb;
                         }
-                    }
+                    },
+                    setApplicationIconBadgeNumber: jasmine.createSpy()
                 };
                 expectedConfig = {
                     android: {
@@ -273,12 +274,12 @@ describe('Service: pushNotifications', function () {
             it('handles notification with count set', function() {
                 var count = 13;
                 notify({count: count});
-                expect(push.setApplicationIconBadgeNumber).toHaveBeenCalledWith(jasmine.any(Function), jasmine.any(Function), count);
+                expect(pushInstance.setApplicationIconBadgeNumber).toHaveBeenCalledWith(jasmine.any(Function), jasmine.any(Function), count);
             });
 
             it('handles notification with count not set', function() {
                 notify({});
-                expect(push.setApplicationIconBadgeNumber).not.toHaveBeenCalledWith(jasmine.any(Function), jasmine.any(Function), jasmine.any(Number));
+                expect(pushInstance.setApplicationIconBadgeNumber).not.toHaveBeenCalledWith(jasmine.any(Function), jasmine.any(Function), jasmine.any(Number));
             });
         });
     });
