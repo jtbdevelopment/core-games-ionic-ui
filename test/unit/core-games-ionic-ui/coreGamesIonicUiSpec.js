@@ -21,9 +21,12 @@ describe('', function() {
     expect(hasModule('coreGamesIonicUi.config')).toBeTruthy();
   });
 
-  
 
-  
+
+  it('should load interceptors module', function() {
+    expect(hasModule('coreGamesIonicUi.interceptors')).toBeTruthy();
+  });
+
 
   
   it('should load services module', function() {

@@ -1,27 +1,29 @@
 (function (angular) {
 
-  // Create all modules and define dependencies to make sure they exist
-  // and are loaded in the correct order to satisfy dependency injection
-  // before all nested files are concatenated by Gulp
+    // Create all modules and define dependencies to make sure they exist
+    // and are loaded in the correct order to satisfy dependency injection
+    // before all nested files are concatenated by Gulp
 
-  // Config
-  angular.module('coreGamesIonicUi.config', [])
-      .value('coreGamesIonicUi.config', {
-          debug: true
-      });
+    // Config
+    angular.module('coreGamesIonicUi.config', [])
+        .value('coreGamesIonicUi.config', {
+            debug: true
+        });
 
-  // Modules
-  angular.module('coreGamesIonicUi.controllers', []);
-  angular.module('coreGamesIonicUi.services', []);
-  angular.module('coreGamesIonicUi',
-      [
-          'ionic',
-          'ngCordova',
-          'coreGamesUi',
-          'coreGamesIonicUi.config',
-          'coreGamesIonicUi.services',
-          'coreGamesIonicUi.controllers'
-      ]);
+    // Modules
+    angular.module('coreGamesIonicUi.controllers', []);
+    angular.module('coreGamesIonicUi.services', []);
+    angular.module('coreGamesIonicUi.interceptors', []);
+    angular.module('coreGamesIonicUi',
+        [
+            'ionic',
+            'ngCordova',
+            'coreGamesUi',
+            'coreGamesIonicUi.config',
+            'coreGamesIonicUi.interceptors',
+            'coreGamesIonicUi.services',
+            'coreGamesIonicUi.controllers'
+        ]);
 
 })(angular);
 
@@ -206,6 +208,31 @@ angular.module('coreGamesIonicUi.controllers')
         }
     ]
 );
+
+'use strict';
+
+angular.module('coreGamesIonicUi.interceptors').factory('jtbApiEndpointInterceptor',
+    ['$q', 'ENV',
+        function ($q, ENV) {
+            return {
+                'request': function (config) {
+                    if (
+                        (
+                            //  TODO - this better
+                            config.url.indexOf('/api') >= 0 ||
+                            config.url.indexOf('/auth') >= 0 ||
+                            config.url.indexOf('/signout') >= 0 ||
+                            config.url.indexOf('/livefeed') >= 0 ||
+                            config.url.indexOf('/signin/authenticate') >= 0
+                        ) && config.url.indexOf(ENV.apiEndpoint) < 0) {
+                        config.url = ENV.apiEndpoint + config.url;
+                    }
+                    return config;
+                }
+            };
+        }
+    ]);
+
 
 /*global PushNotification:false */
 'use strict';
