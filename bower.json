@@ -20,7 +20,7 @@
   "dependencies": {
     "angular": "~1.4.7",
     "ionic": "driftyco/ionic-bower#1.1.0",
-    "jtb-core-games-ui": "~1.2.2",
+    "jtb-core-games-ui": "~1.4.1",
     "ngCordova": "v0.1.14-alpha"
   },
   "devDependencies": {
