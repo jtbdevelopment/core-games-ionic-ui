@@ -20,5 +20,8 @@ angular.module('coreGamesIonicUi.interceptors').factory('jtbApiEndpointIntercept
                 }
             };
         }
-    ]);
+    ])
+    .config(['$httpProvider', function ($httpProvider) {
+        $httpProvider.interceptors.push('jtbApiEndpointInterceptor');
+    }]);
 

@@ -23,7 +23,11 @@
             'coreGamesIonicUi.interceptors',
             'coreGamesIonicUi.services',
             'coreGamesIonicUi.controllers'
-        ]);
+        ])
+        .config(['$httpProvider', function ($httpProvider) {
+            $httpProvider.defaults.withCredentials = true;
+        }])
+    ;
 
 })(angular);
 
@@ -231,7 +235,10 @@ angular.module('coreGamesIonicUi.interceptors').factory('jtbApiEndpointIntercept
                 }
             };
         }
-    ]);
+    ])
+    .config(['$httpProvider', function ($httpProvider) {
+        $httpProvider.interceptors.push('jtbApiEndpointInterceptor');
+    }]);
 
 
 /*global PushNotification:false */

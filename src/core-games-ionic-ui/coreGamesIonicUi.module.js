@@ -23,6 +23,10 @@
             'coreGamesIonicUi.interceptors',
             'coreGamesIonicUi.services',
             'coreGamesIonicUi.controllers'
-        ]);
+        ])
+        .config(['$httpProvider', function ($httpProvider) {
+            $httpProvider.defaults.withCredentials = true;
+        }])
+    ;
 
 })(angular);
