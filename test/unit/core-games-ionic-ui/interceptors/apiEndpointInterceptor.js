@@ -1,7 +1,12 @@
 'use strict';
 
 describe('Service: unauthorizedHandler', function () {
+    var httpProvider;
     // load the controller's module
+    beforeEach(module('coreGamesIonicUi.interceptors', function ($httpProvider) {
+        httpProvider = $httpProvider;
+    }));
+    
     beforeEach(module('coreGamesIonicUi.interceptors'));
 
     var ENV = {apiEndpoint: 'http://xyz.com'};
@@ -17,6 +22,10 @@ describe('Service: unauthorizedHandler', function () {
     beforeEach(inject(function ($injector) {
         interceptor = $injector.get('jtbApiEndpointInterceptor');
     }));
+
+    it('registers interceptor', function () {
+        expect(httpProvider.interceptors).toContain('jtbApiEndpointInterceptor');
+    });
 
     it('does not prepend a random url', function () {
         var config = {url: 'x'};
