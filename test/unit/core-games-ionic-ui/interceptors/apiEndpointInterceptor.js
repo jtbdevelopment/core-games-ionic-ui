@@ -1,6 +1,6 @@
 'use strict';
 
-describe('Service: unauthorizedHandler', function () {
+describe('Interceptor: jtbApiEndpointInterceptor', function () {
     var httpProvider;
     // load the controller's module
     beforeEach(module('coreGamesIonicUi.interceptors', function ($httpProvider) {
