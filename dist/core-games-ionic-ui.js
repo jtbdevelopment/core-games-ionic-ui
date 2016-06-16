@@ -6,9 +6,13 @@
 
     // Config
     angular.module('coreGamesIonicUi.config', [])
+        .config(['$httpProvider', function ($httpProvider) {
+            $httpProvider.defaults.withCredentials = true;
+        }])
         .value('coreGamesIonicUi.config', {
             debug: true
-        });
+        })
+    ;
 
     // Modules
     angular.module('coreGamesIonicUi.controllers', []);
@@ -24,9 +28,6 @@
             'coreGamesIonicUi.services',
             'coreGamesIonicUi.controllers'
         ])
-        .config(['$httpProvider', function ($httpProvider) {
-            $httpProvider.defaults.withCredentials = true;
-        }])
     ;
 
 })(angular);
