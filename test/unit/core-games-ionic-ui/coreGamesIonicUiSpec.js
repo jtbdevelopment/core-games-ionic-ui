@@ -10,7 +10,6 @@ describe('', function () {
     };
 
     beforeEach(module('coreGamesIonicUi.config', function($httpProvider) {
-        console.log('init');
         httpProvider = $httpProvider;
     }));
     
