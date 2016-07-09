@@ -18,7 +18,7 @@ module.exports = function(config) {
 //      'karma-chai',
 //      'karma-sinon-chai',
       'karma-chrome-launcher',
-      'karma-phantomjs-launcher',
+      'karma-phantomjs2-launcher',
       'karma-jquery',
 //      'karma-chai-jquery',
       'karma-spec-reporter',
@@ -80,7 +80,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['PhantomJS'],
+    browsers: ['PhantomJS2'],
 
 
     // Continuous Integration mode
