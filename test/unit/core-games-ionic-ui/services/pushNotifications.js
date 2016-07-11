@@ -127,7 +127,7 @@ describe('Service: pushNotifications', function () {
             expect(pushInstance.on).toHaveBeenCalledWith('error', jasmine.any(Function));
             expect(pushInstance.on).toHaveBeenCalledWith('notification', jasmine.any(Function));
 
-            pushInstance.on.reset();
+            pushInstance.on.calls.reset();
             push = {};
             rootScope.$broadcast('playerLoaded');
             rootScope.$apply();

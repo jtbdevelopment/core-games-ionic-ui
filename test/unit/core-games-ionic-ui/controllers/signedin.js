@@ -23,7 +23,7 @@ describe('Controller: CoreIonicSignedInCtrl', function () {
     beforeEach(inject(function ($controller, $rootScope) {
         scope = $rootScope.$new();
         rootScope = $rootScope;
-        spyOn(rootScope, '$broadcast').andCallThrough();
+        spyOn(rootScope, '$broadcast').and.callThrough();
         SignedInCtrl = $controller('CoreIonicSignedInCtrl', {
             $scope: scope,
             $state: state,
