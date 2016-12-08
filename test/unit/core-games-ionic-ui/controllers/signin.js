@@ -6,7 +6,7 @@ describe('Controller: CoreIonicSignInCtrl', function () {
     // load the controller's module
     beforeEach(module('coreGamesIonicUi.controllers'));
 
-    var SignInCtrl, scope, q, mockFacebook, autoLogin, doLogin, state, http, rootScope;
+    var SignInCtrl, scope, $q, mockFacebook, autoLogin, doLogin, state, $http, $rootScope;
     var window;
     var token = 'sometoken';
 
@@ -26,10 +26,10 @@ describe('Controller: CoreIonicSignInCtrl', function () {
     };
 
     // Initialize the controller and a mock scope
-    beforeEach(inject(function ($controller, $rootScope, $q, $httpBackend) {
+    beforeEach(inject(function ($controller, _$rootScope_, _$q_, $httpBackend) {
         ENV = {
             domain: 'somedomain',
-            apiEndpoint: 'http://123.com/base'
+            apiEndpoint: '$http://123.com/base'
         };
         window = {
             location: {
@@ -37,18 +37,18 @@ describe('Controller: CoreIonicSignInCtrl', function () {
             }
         };
 
-        q = $q;
-        rootScope = $rootScope;
-        http = $httpBackend;
+        $q = _$q_;
+        $rootScope = _$rootScope_;
+        $http = $httpBackend;
 
         state = {go: jasmine.createSpy()};
         mockFacebook = {
             canAutoSignIn: function () {
-                autoLogin = q.defer();
+                autoLogin = $q.defer();
                 return autoLogin.promise;
             },
             initiateFBLogin: function () {
-                doLogin = q.defer();
+                doLogin = $q.defer();
                 return doLogin.promise;
             },
             currentAuthorization: function () {
@@ -57,7 +57,7 @@ describe('Controller: CoreIonicSignInCtrl', function () {
                 }
             }
         };
-        scope = $rootScope.$new();
+        scope = _$rootScope_.$new();
         SignInCtrl = $controller('CoreIonicSignInCtrl', {
             $scope: scope,
             $window: window,
@@ -70,26 +70,26 @@ describe('Controller: CoreIonicSignInCtrl', function () {
     }));
 
     it('initializes', function () {
-        expect(scope.showFacebook).toEqual(false);
-        expect(scope.showManual).toEqual(false);
-        expect(scope.message).toEqual('');
+        expect(SignInCtrl.showFacebook).toEqual(false);
+        expect(SignInCtrl.showManual).toEqual(false);
+        expect(SignInCtrl.message).toEqual('');
     });
 
     describe('on enter is published', function () {
         beforeEach(function () {
-            rootScope.$broadcast('$ionicView.enter');
-            rootScope.$apply();
+            $rootScope.$broadcast('$ionicView.enter');
+            $rootScope.$apply();
         });
 
         it('initializes and can autologin, file', function () {
             window.location.href = 'file://somefile';
             autoLogin.resolve({auto: true, permissions: 'perm'});
-            http.expectGET(ENV.apiEndpoint + '/auth/facebook?code=' + token).respond(200);
+            $http.expectGET(ENV.apiEndpoint + '/auth/facebook?code=' + token).respond(200);
             scope.$apply();
-            http.flush();
-            expect(scope.showFacebook).toEqual(false);
-            expect(scope.showManual).toEqual(false);
-            expect(scope.message).toEqual('Logging in via Facebook');
+            $http.flush();
+            expect(SignInCtrl.showFacebook).toEqual(false);
+            expect(SignInCtrl.showManual).toEqual(false);
+            expect(SignInCtrl.message).toEqual('Logging in via Facebook');
             expect(ionicLoadng.hide).toHaveBeenCalled();
             expect(state.go).toHaveBeenCalledWith('signedin');
         });
@@ -97,24 +97,24 @@ describe('Controller: CoreIonicSignInCtrl', function () {
         it('initializes and can autologin, file, withError', function () {
             window.location.href = 'file://somefile';
             autoLogin.resolve({auto: true, permissions: 'perm'});
-            http.expectGET(ENV.apiEndpoint + '/auth/facebook?code=' + token).respond(500);
+            $http.expectGET(ENV.apiEndpoint + '/auth/facebook?code=' + token).respond(500);
             scope.$apply();
-            http.flush();
+            $http.flush();
             expect(httpCache.removeAll).toHaveBeenCalled();
-            expect(scope.showFacebook).toEqual(false);
-            expect(scope.showManual).toEqual(false);
-            expect(scope.message).toEqual('Invalid username or password.');
+            expect(SignInCtrl.showFacebook).toEqual(false);
+            expect(SignInCtrl.showManual).toEqual(false);
+            expect(SignInCtrl.message).toEqual('Invalid username or password.');
             expect(ionicLoadng.hide).toHaveBeenCalled();
             expect(state.go).not.toHaveBeenCalledWith('signedin');
         });
 
-        it('initializes and can autologin, http', function () {
-            window.location.href = 'http://somefile';
+        it('initializes and can autologin, $http', function () {
+            window.location.href = '$http://somefile';
             autoLogin.resolve({auto: true, permissions: 'perm'});
             scope.$apply();
-            expect(scope.showFacebook).toEqual(false);
-            expect(scope.showManual).toEqual(false);
-            expect(scope.message).toEqual('Logging in via Facebook');
+            expect(SignInCtrl.showFacebook).toEqual(false);
+            expect(SignInCtrl.showManual).toEqual(false);
+            expect(SignInCtrl.message).toEqual('Logging in via Facebook');
             expect(window.location).toEqual(ENV.apiEndpoint + '/auth/facebook');
         });
 
@@ -122,112 +122,112 @@ describe('Controller: CoreIonicSignInCtrl', function () {
             ENV.domain = 'localhost';
             autoLogin.resolve({auto: false, permissions: 'perm'});
             scope.$apply();
-            expect(scope.showFacebook).toEqual(true);
-            expect(scope.showManual).toEqual(true);
-            expect(scope.message).toEqual('');
+            expect(SignInCtrl.showFacebook).toEqual(true);
+            expect(SignInCtrl.showManual).toEqual(true);
+            expect(SignInCtrl.message).toEqual('');
         });
 
         it('errors with localhost', function () {
             ENV.domain = 'localhost';
             autoLogin.reject();
             scope.$apply();
-            expect(scope.showFacebook).toEqual(true);
-            expect(scope.showManual).toEqual(true);
-            expect(scope.message).toEqual('');
+            expect(SignInCtrl.showFacebook).toEqual(true);
+            expect(SignInCtrl.showManual).toEqual(true);
+            expect(SignInCtrl.message).toEqual('');
         });
 
         it('initializes and cannot autologin with -dev', function () {
-            ENV.apiEndpoint = 'http://something-dev.aws.com';
+            ENV.apiEndpoint = '$http://something-dev.aws.com';
             autoLogin.resolve({auto: false, permissions: 'perm'});
             scope.$apply();
-            expect(scope.showFacebook).toEqual(true);
-            expect(scope.showManual).toEqual(true);
-            expect(scope.message).toEqual('');
+            expect(SignInCtrl.showFacebook).toEqual(true);
+            expect(SignInCtrl.showManual).toEqual(true);
+            expect(SignInCtrl.message).toEqual('');
         });
 
         it('errors with -dev', function () {
-            ENV.apiEndpoint = 'http://something-dev.aws.com';
+            ENV.apiEndpoint = '$http://something-dev.aws.com';
             autoLogin.reject();
             scope.$apply();
-            expect(scope.showFacebook).toEqual(true);
-            expect(scope.showManual).toEqual(true);
-            expect(scope.message).toEqual('');
+            expect(SignInCtrl.showFacebook).toEqual(true);
+            expect(SignInCtrl.showManual).toEqual(true);
+            expect(SignInCtrl.message).toEqual('');
         });
 
         it('initializes and cannot autologin with non-manual', function () {
             autoLogin.resolve({auto: false, permissions: 'perm2'});
             scope.$apply();
-            expect(scope.showFacebook).toEqual(true);
-            expect(scope.showManual).toEqual(false);
-            expect(scope.message).toEqual('');
+            expect(SignInCtrl.showFacebook).toEqual(true);
+            expect(SignInCtrl.showManual).toEqual(false);
+            expect(SignInCtrl.message).toEqual('');
         });
 
         it('errors with non-manual', function () {
             autoLogin.reject();
             scope.$apply();
-            expect(scope.showFacebook).toEqual(true);
-            expect(scope.showManual).toEqual(false);
-            expect(scope.message).toEqual('');
+            expect(SignInCtrl.showFacebook).toEqual(true);
+            expect(SignInCtrl.showManual).toEqual(false);
+            expect(SignInCtrl.message).toEqual('');
         });
 
         it('pressing FB Login to success and auto-login, file', function () {
             window.location.href = 'file://somefile';
-            scope.fbLogin();
+            SignInCtrl.fbLogin();
             doLogin.resolve({auto: true});
-            http.expectGET(ENV.apiEndpoint + '/auth/facebook?code=' + token).respond(200);
+            $http.expectGET(ENV.apiEndpoint + '/auth/facebook?code=' + token).respond(200);
             scope.$apply();
-            http.flush();
-            expect(scope.showFacebook).toEqual(false);
-            expect(scope.showManual).toEqual(false);
-            expect(scope.message).toEqual('Logging in via Facebook');
+            $http.flush();
+            expect(SignInCtrl.showFacebook).toEqual(false);
+            expect(SignInCtrl.showManual).toEqual(false);
+            expect(SignInCtrl.message).toEqual('Logging in via Facebook');
             expect(ionicLoadng.hide).toHaveBeenCalled();
             expect(state.go).toHaveBeenCalledWith('signedin');
         });
 
         it('pressing FB Login to success and auto-login, file, with error', function () {
             window.location.href = 'file://somefile';
-            scope.fbLogin();
+            SignInCtrl.fbLogin();
             doLogin.resolve({auto: true});
-            http.expectGET(ENV.apiEndpoint + '/auth/facebook?code=' + token).respond(500);
+            $http.expectGET(ENV.apiEndpoint + '/auth/facebook?code=' + token).respond(500);
             scope.$apply();
-            http.flush();
+            $http.flush();
             expect(httpCache.removeAll).toHaveBeenCalled();
-            expect(scope.showFacebook).toEqual(false);
-            expect(scope.showManual).toEqual(false);
-            expect(scope.message).toEqual('Invalid username or password.');
+            expect(SignInCtrl.showFacebook).toEqual(false);
+            expect(SignInCtrl.showManual).toEqual(false);
+            expect(SignInCtrl.message).toEqual('Invalid username or password.');
             expect(ionicLoadng.hide).toHaveBeenCalled();
             expect(state.go).not.toHaveBeenCalledWith('signedin');
         });
 
-        it('pressing FB Login to success and auto-login, http', function () {
-            window.location.href = 'http://somefile';
-            scope.fbLogin();
+        it('pressing FB Login to success and auto-login, $http', function () {
+            window.location.href = '$http://somefile';
+            SignInCtrl.fbLogin();
             doLogin.resolve({auto: true});
             scope.$apply();
-            expect(scope.showFacebook).toEqual(false);
-            expect(scope.showManual).toEqual(false);
-            expect(scope.message).toEqual('Logging in via Facebook');
+            expect(SignInCtrl.showFacebook).toEqual(false);
+            expect(SignInCtrl.showManual).toEqual(false);
+            expect(SignInCtrl.message).toEqual('Logging in via Facebook');
             expect(window.location).toEqual(ENV.apiEndpoint + '/auth/facebook');
         });
 
         it('pressing FB Login to success but not auto-login', function () {
             window.location = {href: 'somethinglocalhostsomething'};
-            scope.fbLogin();
+            SignInCtrl.fbLogin();
             doLogin.resolve({auto: false});
             scope.$apply();
-            expect(scope.showFacebook).toEqual(true);
-            expect(scope.showManual).toEqual(false);
-            expect(scope.message).toEqual('');
+            expect(SignInCtrl.showFacebook).toEqual(true);
+            expect(SignInCtrl.showManual).toEqual(false);
+            expect(SignInCtrl.message).toEqual('');
         });
 
         it('pressing FB Login to failure', function () {
             window.location = {href: 'somethinglocalhostsomething'};
-            scope.fbLogin();
+            SignInCtrl.fbLogin();
             doLogin.reject();
             scope.$apply();
-            expect(scope.showFacebook).toEqual(true);
-            expect(scope.showManual).toEqual(false);
-            expect(scope.message).toEqual('');
+            expect(SignInCtrl.showFacebook).toEqual(true);
+            expect(SignInCtrl.showManual).toEqual(false);
+            expect(SignInCtrl.message).toEqual('');
         });
     });
 });

@@ -36,49 +36,51 @@
 
 angular.module('coreGamesIonicUi.controllers')
     .controller('CoreIonicNetworkCtrl',
-    ['$scope', '$state', '$cordovaNetwork', '$timeout', '$window', 'ENV',
-        function ($scope, $state, $cordovaNetwork, $timeout, $window, ENV) {
-            function online() {
-                $state.go('signin');
-            }
+        ['$scope', '$state', '$cordovaNetwork', '$timeout', '$window', 'ENV',
+            function ($scope, $state, $cordovaNetwork, $timeout, $window, ENV) {
+                var controller = this;
 
-            function checkOnline() {
-                $scope.message = 'Checking network status...';
-                //  Need a timeout to ensure its initialized
-                if ($window.location.href.indexOf('file') === 0 && ENV.domain !== 'localhost') {
-                    $timeout(function () {
-                        try {
-                            if ($cordovaNetwork.isOnline()) {
-                                online();
-                                return;
-                            }
-                        } catch (error) {
-                            if (error.message === 'navigator.connection is undefined') {
-                                //  Assume a browser and go
-                                online();
-                                return;
-                            }
-                            console.log(error);
-                        }
-                        $scope.message = 'Internet not currently available.';
-                    }, 1000);
-                } else {
-                    online();
+                function online() {
+                    $state.go('signin');
                 }
-            }
 
-            $scope.$on('$cordovaNetwork:online', function () {
-                online();
-            });
+                function checkOnline() {
+                    controller.message = 'Checking network status...';
+                    //  Need a timeout to ensure its initialized
+                    if ($window.location.href.indexOf('file') === 0 && ENV.domain !== 'localhost') {
+                        $timeout(function () {
+                            try {
+                                if ($cordovaNetwork.isOnline()) {
+                                    online();
+                                    return;
+                                }
+                            } catch (error) {
+                                if (error.message === 'navigator.connection is undefined') {
+                                    //  Assume a browser and go
+                                    online();
+                                    return;
+                                }
+                                console.log(error);
+                            }
+                            controller.message = 'Internet not currently available.';
+                        }, 1000);
+                    } else {
+                        online();
+                    }
+                }
 
-            $scope.$on('$ionicView.enter', function () {
+                $scope.$on('$cordovaNetwork:online', function () {
+                    online();
+                });
+
+                $scope.$on('$ionicView.enter', function () {
+                    checkOnline();
+                });
+
                 checkOnline();
-            });
-
-            checkOnline();
-        }
-    ]
-);
+            }
+        ]
+    );
 'use strict';
 
 angular.module('coreGamesIonicUi.controllers')
@@ -106,113 +108,115 @@ angular.module('coreGamesIonicUi.controllers')
 );
 'use strict';
 
+//  TODO - Make this a popup on error I think
 angular.module('coreGamesIonicUi.controllers')
     .controller('CoreIonicSignInCtrl',
-    ['$scope', '$window', '$http', '$state', '$cacheFactory', 'jtbFacebook', 'ENV', '$ionicLoading',
-        function ($scope, $window, $http, $state, $cacheFactory, jtbFacebook, ENV, $ionicLoading) {
-            //  TODO - Make this a popup on error I think
-            $scope.message = '';
-            $scope.showFacebook = false;
-            $scope.showManual = false;
+        ['$scope', '$window', '$http', '$state', '$cacheFactory', 'jtbFacebook', 'ENV', '$ionicLoading',
+            function ($scope, $window, $http, $state, $cacheFactory, jtbFacebook, ENV, $ionicLoading) {
+                var controller = this;
 
-            $scope.manualForm = {
-                username: '',
-                password: '',
-                rememberme: false
-            };
+                controller.message = '';
+                controller.showFacebook = false;
+                controller.showManual = false;
 
-            function clearHttpCache() {
-                $cacheFactory.get('$http').removeAll();
-            }
+                controller.manualForm = {
+                    username: '',
+                    password: '',
+                    rememberMe: false
+                };
 
-            function onSuccessfulLogin() {
-                $ionicLoading.hide();
-                $state.go('signedin');
-            }
-
-            function onFailedLogin() {
-                $ionicLoading.hide();
-                console.log('Login failed');
-                clearHttpCache();
-                $scope.message = 'Invalid username or password.';
-            }
-
-            // Not testing since only used as a dev tool
-            $scope.manualLogin = function () {
-                $ionicLoading.show({
-                    template: 'Sending...'
-                });
-                clearHttpCache();
-                $http({
-                    transformRequest: function (obj) {
-                        var str = [];
-                        for (var p in obj) {
-                            if (obj.hasOwnProperty(p)) {
-                                str.push(encodeURIComponent(p) + '=' + encodeURIComponent(obj[p]));
-                            }
-                        }
-                        return str.join('&');
-                    },
-                    url: '/signin/authenticate',
-                    data: {
-                        username: $scope.manualForm.username,
-                        password: $scope.manualForm.password,
-                        'remember-me': $scope.manualForm.rememberme
-                    },
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    method: 'POST'
-                }).success(onSuccessfulLogin).error(onFailedLogin);
-            };
-
-            function showLoginOptions() {
-                $scope.showFacebook = true;
-                $scope.showManual = ENV.domain === 'localhost' || ENV.apiEndpoint.indexOf('-dev') > -1;
-                $scope.message = '';
-            }
-
-            function autoLogin() {
-                $scope.showFacebook = false;
-                $scope.showManual = false;
-                $scope.message = 'Logging in via Facebook';
-                clearHttpCache();
-                if ($window.location.href.indexOf('file') === 0) {
-                    $http.get(ENV.apiEndpoint +
-                        '/auth/facebook?code=' +
-                        jtbFacebook.currentAuthorization().accessToken).
-                        success(onSuccessfulLogin).
-                        error(onFailedLogin);
-                } else {
-                    $window.location = ENV.apiEndpoint + '/auth/facebook';
+                function clearHttpCache() {
+                    $cacheFactory.get('$http').removeAll();
                 }
-            }
 
-            $scope.fbLogin = function () {
-                jtbFacebook.initiateFBLogin().then(function (details) {
-                    if (!details.auto) {
-                        showLoginOptions();
-                    } else {
-                        autoLogin();
-                    }
-                }, function () {
-                    showLoginOptions();
-                });
-            };
+                function onSuccessfulLogin() {
+                    $ionicLoading.hide();
+                    $state.go('signedin');
+                }
 
-            $scope.$on('$ionicView.enter', function () {
-                jtbFacebook.canAutoSignIn().then(function (details) {
+                function onFailedLogin() {
+                    $ionicLoading.hide();
+                    console.log('Login failed');
                     clearHttpCache();
-                    if (!details.auto) {
-                        showLoginOptions();
+                    controller.message = 'Invalid username or password.';
+                }
+
+                // Not testing since only used as a dev tool
+                controller.manualLogin = function () {
+                    $ionicLoading.show({
+                        template: 'Sending...'
+                    });
+                    clearHttpCache();
+                    $http({
+                        transformRequest: function (obj) {
+                            var str = [];
+                            for (var p in obj) {
+                                if (obj.hasOwnProperty(p)) {
+                                    str.push(encodeURIComponent(p) + '=' + encodeURIComponent(obj[p]));
+                                }
+                            }
+                            return str.join('&');
+                        },
+                        url: '/signin/authenticate',
+                        data: {
+                            username: controller.manualForm.username,
+                            password: controller.manualForm.password,
+                            'remember-me': controller.manualForm.rememberMe
+                        },
+                        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                        method: 'POST'
+                    }).success(onSuccessfulLogin).error(onFailedLogin);
+                };
+
+                function showLoginOptions() {
+                    controller.showFacebook = true;
+                    controller.showManual = ENV.domain === 'localhost' || ENV.apiEndpoint.indexOf('-dev') > -1;
+                    controller.message = '';
+                }
+
+                function autoLogin() {
+                    controller.showFacebook = false;
+                    controller.showManual = false;
+                    controller.message = 'Logging in via Facebook';
+                    clearHttpCache();
+                    if ($window.location.href.indexOf('file') === 0) {
+                        $http.get(ENV.apiEndpoint +
+                            '/auth/facebook?code=' +
+                            jtbFacebook.currentAuthorization().accessToken)
+                            .success(onSuccessfulLogin)
+                            .error(onFailedLogin);
                     } else {
-                        autoLogin();
+                        $window.location = ENV.apiEndpoint + '/auth/facebook';
                     }
-                }, function () {
-                    showLoginOptions();
+                }
+
+                controller.fbLogin = function () {
+                    jtbFacebook.initiateFBLogin().then(function (details) {
+                        if (!details.auto) {
+                            showLoginOptions();
+                        } else {
+                            autoLogin();
+                        }
+                    }, function () {
+                        showLoginOptions();
+                    });
+                };
+
+                $scope.$on('$ionicView.enter', function () {
+                    jtbFacebook.canAutoSignIn().then(function (details) {
+                        clearHttpCache();
+                        if (!details.auto) {
+                            showLoginOptions();
+                        } else {
+                            autoLogin();
+                        }
+                    }, function () {
+                        showLoginOptions();
+                    });
                 });
-            });
-        }
-    ]
-);
+            }
+        ]
+    );
 
 'use strict';
 
@@ -251,6 +255,8 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
         function ($http, $rootScope, $timeout, $window, jtbLocalStorage, jtbPlayerService) {
 
             var deviceToken;
+            var pushInstance;
+
 
             function registerToken(token) {
                 console.log('register token called with ' + JSON.stringify(token));
@@ -305,8 +311,6 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
             function handleRegistration(data) {
                 registerToken(data.registrationId);
             }
-
-            var pushInstance;
 
             $rootScope.$on('playerLoaded', function () {
                 $http.get('/api/notifications/senderID', {cache: true}).success(function (id) {

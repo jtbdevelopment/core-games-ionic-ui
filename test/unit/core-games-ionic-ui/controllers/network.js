@@ -5,7 +5,7 @@ describe('Controller: CoreIonicSignInCtrl', function () {
     // load the controller's module
     beforeEach(module('coreGamesIonicUi.controllers'));
 
-    var CoreIonicNetworkCtrl, scope, q, mockNetwork, state, http, rootScope, timeout;
+    var CoreIonicNetworkCtrl, scope, mockNetwork, state, http, $rootScope, $timeout;
     var window;
 
     var isOnline = false;
@@ -21,7 +21,7 @@ describe('Controller: CoreIonicSignInCtrl', function () {
     var ENV;
 
     // Initialize the controller and a mock scope
-    beforeEach(inject(function ($rootScope, $timeout) {
+    beforeEach(inject(function (_$rootScope_, _$timeout_) {
         ENV = {
             domain: 'somedomain',
             apiEndpoint: 'http://123.com/base'
@@ -32,8 +32,8 @@ describe('Controller: CoreIonicSignInCtrl', function () {
             }
         };
 
-        rootScope = $rootScope;
-        timeout = $timeout;
+        $rootScope = _$rootScope_;
+        $timeout = _$timeout_;
 
         state = {go: jasmine.createSpy()};
         scope = $rootScope.$new();
@@ -51,60 +51,60 @@ describe('Controller: CoreIonicSignInCtrl', function () {
             });
         }));
         it('initializes, not localhost and offline', function () {
-            expect(scope.message).toEqual('Checking network status...');
-            timeout.flush();
+            expect(CoreIonicNetworkCtrl.message).toEqual('Checking network status...');
+            $timeout.flush();
             expect(state.go).not.toHaveBeenCalledWith('signin');
-            expect(scope.message).toEqual('Internet not currently available.');
+            expect(CoreIonicNetworkCtrl.message).toEqual('Internet not currently available.');
         });
 
         it('initializes and offline and online broadcast', function () {
-            expect(scope.message).toEqual('Checking network status...');
-            timeout.flush();
+            expect(CoreIonicNetworkCtrl.message).toEqual('Checking network status...');
+            $timeout.flush();
             expect(state.go).not.toHaveBeenCalledWith('signin');
-            expect(scope.message).toEqual('Internet not currently available.');
+            expect(CoreIonicNetworkCtrl.message).toEqual('Internet not currently available.');
 
-            rootScope.$broadcast('$cordovaNetwork:online');
-            rootScope.$apply();
+            $rootScope.$broadcast('$cordovaNetwork:online');
+            $rootScope.$apply();
             expect(state.go).toHaveBeenCalledWith('signin');
         });
 
         it('initializes and offline and re-entered, now online', function () {
-            expect(scope.message).toEqual('Checking network status...');
-            timeout.flush();
+            expect(CoreIonicNetworkCtrl.message).toEqual('Checking network status...');
+            $timeout.flush();
             expect(state.go).not.toHaveBeenCalledWith('signin');
-            expect(scope.message).toEqual('Internet not currently available.');
+            expect(CoreIonicNetworkCtrl.message).toEqual('Internet not currently available.');
 
-            rootScope.$broadcast('$ionicView.enter');
-            rootScope.$apply();
+            $rootScope.$broadcast('$ionicView.enter');
+            $rootScope.$apply();
 
             isOnline = true;
-            expect(scope.message).toEqual('Checking network status...');
-            timeout.flush();
+            expect(CoreIonicNetworkCtrl.message).toEqual('Checking network status...');
+            $timeout.flush();
             expect(state.go).toHaveBeenCalledWith('signin');
         });
 
         it('initializes, not localhost and online', function () {
-            expect(scope.message).toEqual('Checking network status...');
+            expect(CoreIonicNetworkCtrl.message).toEqual('Checking network status...');
             isOnline = true;
-            timeout.flush();
+            $timeout.flush();
             expect(state.go).toHaveBeenCalledWith('signin');
         });
 
         it('initializes, not localhost and exception smells like a browser', function () {
-            expect(scope.message).toEqual('Checking network status...');
+            expect(CoreIonicNetworkCtrl.message).toEqual('Checking network status...');
             isOnline = undefined;
             exception = {message: 'navigator.connection is undefined'};
-            timeout.flush();
+            $timeout.flush();
             expect(state.go).toHaveBeenCalledWith('signin');
         });
 
         it('initializes, not localhost and exception does not smells like a browser', function () {
-            expect(scope.message).toEqual('Checking network status...');
+            expect(CoreIonicNetworkCtrl.message).toEqual('Checking network status...');
             isOnline = undefined;
             exception = {message: 'blah'};
-            timeout.flush();
+            $timeout.flush();
             expect(state.go).not.toHaveBeenCalledWith('signin');
-            expect(scope.message).toEqual('Internet not currently available.');
+            expect(CoreIonicNetworkCtrl.message).toEqual('Internet not currently available.');
         });
     });
 
@@ -121,7 +121,7 @@ describe('Controller: CoreIonicSignInCtrl', function () {
         }));
         it('initializes', function () {
             expect(state.go).toHaveBeenCalledWith('signin');
-            expect(scope.message).toEqual('Checking network status...');
+            expect(CoreIonicNetworkCtrl.message).toEqual('Checking network status...');
         });
     });
 });

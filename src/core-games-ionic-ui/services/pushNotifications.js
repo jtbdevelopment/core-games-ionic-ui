@@ -7,6 +7,8 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
         function ($http, $rootScope, $timeout, $window, jtbLocalStorage, jtbPlayerService) {
 
             var deviceToken;
+            var pushInstance;
+
 
             function registerToken(token) {
                 console.log('register token called with ' + JSON.stringify(token));
@@ -61,8 +63,6 @@ angular.module('coreGamesIonicUi.services').factory('jtbPushNotifications',
             function handleRegistration(data) {
                 registerToken(data.registrationId);
             }
-
-            var pushInstance;
 
             $rootScope.$on('playerLoaded', function () {
                 $http.get('/api/notifications/senderID', {cache: true}).success(function (id) {
