@@ -98,12 +98,12 @@ gulp.task('cache-html', function () {
         .src(htmlFiles)
         .pipe(minifyHtml({collapseWhitespace: true}))
         .pipe(angularTemplateCache('templates.js', {
-            root: 'views/core-bs/',
-            module: 'coreGamesBootstrapUi.templates',
+            root: 'templates/core-ionic/',
+            module: 'coreGamesIonicUi.templates',
             standalone: false,
-            base: path.join(sourceDirectory, '/core-games-bootstrap-ui/templates/')
+            base: path.join(sourceDirectory, '/core-games-ionic-ui/templates/')
         }))
-        .pipe(gulp.dest(path.join(sourceDirectory, '/core-games-bootstrap-ui/templates/')));
+        .pipe(gulp.dest(path.join(sourceDirectory, '/core-games-ionic-ui/templates/')));
 });
 
 gulp.task('build', function () {

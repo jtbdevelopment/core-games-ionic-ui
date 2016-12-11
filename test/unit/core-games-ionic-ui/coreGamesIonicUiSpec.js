@@ -35,6 +35,10 @@ describe('', function () {
         expect(hasModule('coreGamesIonicUi.config')).toBeTruthy();
     });
 
+    it('should load config module', function () {
+        expect(hasModule('coreGamesIonicUi.templates')).toBeTruthy();
+    });
+
     it('should load interceptors module', function () {
         expect(hasModule('coreGamesIonicUi.interceptors')).toBeTruthy();
     });

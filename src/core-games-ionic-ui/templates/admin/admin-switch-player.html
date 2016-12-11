@@ -1,0 +1,53 @@
+<div class="admin-user">
+    <div class="row row-center">
+        <div class="col-25">
+            <button class="button button-full button-positive button-stop-simulating"
+                    ng-disabled="!admin.revertEnabled" ng-click="admin.revertToNormal()">Stop
+            </button>
+        </div>
+        <div class="col-75">{{admin.revertText}}</div>
+    </div>
+    <div class="row row-center">
+        <div class="col-25">
+            <button class="button button-full button-energized button-get-users"
+                    ng-click="admin.refreshData()">Get Users
+            </button>
+        </div>
+        <div class="col-75">
+            <div class="list">
+                <label class="item item-input">
+                    <input type="text" ng-model="admin.searchText" placeholder="And Name contains..">
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="item item-divider">
+        <div class="row">
+            <div class="col-50">Display Name</div>
+            <div class="col-25">ID</div>
+            <div class="col-25">Switch</div>
+        </div>
+    </div>
+    <div class="item" ng-repeat="player in admin.players">
+        <div class="row row-center">
+            <div class="col-50">{{player.displayName}}</div>
+            <div class="col-25">{{player.id}}</div>
+            <div class="col-25">
+                <button class="button button-full button-assertive button-change-user"
+                        ng-click="admin.switchToPlayer(player.id)">Switch
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-10">
+            {{admin.currentPage}} of {{admin.numberOfPages}}
+        </div>
+        <div class="col-90">
+            <div class="item range range-positive">
+                <input type="range" name="currentPage" min="1" max="{{admin.numberOfPages}}"
+                       ng-model="admin.currentPage" ng-change="admin.changePage()">
+            </div>
+        </div>
+    </div>
+</div>

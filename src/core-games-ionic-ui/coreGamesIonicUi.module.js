@@ -15,6 +15,7 @@
     ;
 
     // Modules
+    angular.module('coreGamesIonicUi.templates', []);
     angular.module('coreGamesIonicUi.controllers', []);
     angular.module('coreGamesIonicUi.services', []);
     angular.module('coreGamesIonicUi.interceptors', []);
@@ -23,6 +24,7 @@
             'ionic',
             'ngCordova',
             'coreGamesUi',
+            'coreGamesIonicUi.templates',
             'coreGamesIonicUi.config',
             'coreGamesIonicUi.interceptors',
             'coreGamesIonicUi.services',
