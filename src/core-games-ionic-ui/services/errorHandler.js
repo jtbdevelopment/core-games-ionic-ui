@@ -4,6 +4,7 @@ angular.module('coreGamesIonicUi.services').run(
     ['$rootScope', '$state', '$ionicLoading', '$ionicPopup',
         function ($rootScope, $state, $ionicLoading, $ionicPopup) {
             function showErrorAndReconnect() {
+                $ionicLoading.hide();
                 $ionicPopup.alert({
                     title: 'There was a problem!',
                     template: 'Going to reconnect!'
@@ -12,14 +13,18 @@ angular.module('coreGamesIonicUi.services').run(
             }
 
             $rootScope.$on('InvalidSession', function () {
-                $ionicLoading.hide();
                 if ($state.$current.name !== 'signin') {
                     showErrorAndReconnect();
+                } else {
+                    $ionicLoading.hide();
                 }
             });
             $rootScope.$on('GeneralError', function () {
-                $ionicLoading.hide();
                 showErrorAndReconnect();
+            });
+
+            $rootScope.$on('$cordovaNetwork:offline', function() {
+                  showErrorAndReconnect();
             });
         }
     ]

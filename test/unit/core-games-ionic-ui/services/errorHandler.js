@@ -51,11 +51,16 @@ describe('Service: errorHandler registered', function () {
         expect($state.go).not.toHaveBeenCalled();
     });
 
-    it('test an general error broadcast is handled', function () {
+    it('test a general error broadcast is handled', function () {
         $rootScope.$broadcast('GeneralError');
         $rootScope.$apply();
         testStandardErrorDialog();
     });
 
+    it('test a cordova offline is handled', function () {
+        $rootScope.$broadcast('$cordovaNetwork:offline');
+        $rootScope.$apply();
+        testStandardErrorDialog();
+    });
 });
 
