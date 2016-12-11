@@ -1,7 +1,7 @@
 describe('', function () {
 
     beforeEach(function () {
-        module('coreGamesBootstrapUi.templates');
+        module('coreGamesIonicUi.templates');
     });
 
 
