@@ -14,6 +14,18 @@ describe('Service: pushNotifications', function () {
     var localStorage;
 
     beforeEach(module(function ($provide) {
+        $provide.factory('$state', function () {
+           return {
+           }
+        });
+        $provide.factory('$ionicLoading', function () {
+            return {
+            }
+        });
+        $provide.factory('$ionicPopup', function () {
+            return {
+            }
+        });
         localStorage = {};
         $provide.factory('jtbLocalStorage', function () {
             return localStorage;

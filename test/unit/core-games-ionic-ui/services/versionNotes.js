@@ -10,6 +10,14 @@ describe('Service: jtbIonicVersionNotesService', function () {
     };
     var $q, openParams, $ionicPopup, playerService;
     beforeEach(module(function ($provide) {
+        $provide.factory('$state', function () {
+            return {
+            }
+        });
+        $provide.factory('$ionicLoading', function () {
+            return {
+            }
+        });
         $ionicPopup = {
             alert: jasmine.createSpy()
         };
