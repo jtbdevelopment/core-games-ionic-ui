@@ -1,0 +1,33 @@
+<ion-view>
+    <ion-content class="sign-in" ng-cloak>
+        <div class="row text-center">
+            <div class="center">
+                <p>{{signIn.message}}</p>
+            </div>
+        </div>
+
+        <div class="list" ng-show="signIn.showFacebook">
+            <a class="item item-button" href="#" ng-click="signIn.fbLogin()">
+                <img ng-src="images/sign-in-with-facebook.png"/>
+            </a>
+        </div>
+
+        <div class="list" ng-show="signIn.showManual">
+            <span class="item item-divider">Don't want to login with Facebook?</span>
+            <label class="item item-input">
+                <span class="input-label">Email</span>
+                <input id="username" name="username" type="email" size="25" ng-model="signIn.manualForm.username"/>
+            </label>
+            <label class="item item-input">
+                <span class="input-label">Password</span>
+                <input id="password" name="password" type="password" size="25" ng-model="signIn.manualForm.password"/>
+            </label>
+            <ion-toggle ng-model="signIn.manualForm.rememberMe">
+                Remember Me?
+            </ion-toggle>
+            <a class="button-full button-submit button" ng-click="signIn.manualLogin(username, password)">
+                Login
+            </a>
+        </div>
+    </ion-content>
+</ion-view>
