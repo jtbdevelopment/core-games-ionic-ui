@@ -21,6 +21,7 @@ describe('Service: errorHandler registered', function () {
         $provide.factory('$ionicLoading', function () {
             return $ionicLoading;
         });
+        $provide.factory('jtbLiveGameFeed', function() { return {}});
     }));
 
     beforeEach(inject(function (_$rootScope_) {

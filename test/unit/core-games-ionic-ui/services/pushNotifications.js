@@ -37,6 +37,7 @@ describe('Service: pushNotifications', function () {
                 }
             };
         });
+        $provide.factory('jtbLiveGameFeed', function() { return {}});
     }));
 
     beforeEach(inject(function ($injector, $rootScope, $httpBackend, $timeout) {

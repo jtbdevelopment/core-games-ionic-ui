@@ -10,13 +10,17 @@ describe('Service: jtbIonicVersionNotesService', function () {
     };
     var $q, openParams, $ionicPopup, playerService;
     beforeEach(module(function ($provide) {
+        $provide.factory('jtbLiveGameFeed', function () {
+            return {}
+        });
+        $provide.factory('$document', function () {
+            return {bind: jasmine.createSpy()}
+        });
         $provide.factory('$state', function () {
-            return {
-            }
+            return {}
         });
         $provide.factory('$ionicLoading', function () {
-            return {
-            }
+            return {}
         });
         $ionicPopup = {
             alert: jasmine.createSpy()
