@@ -1,18 +1,35 @@
-<!--  TODO -->
-<div class="invite-dialog">
-    <div class="modal-header">
-        <h3 class="modal-title">Invite Friends to Play</h3>
-    </div>
-    <div class="modal-body">
-        <ui-select multiple ng-model="invite.chosenFriends" theme="bootstrap" reset-search-input="true">
-            <ui-select-match placeholder="Select friends...">{{$item.name}}</ui-select-match>
-            <ui-select-choices repeat="friend in invite.invitableFriends | propsFilter: {name: $select.search}">
-                <div ng-bind-html="friend.name | highlight: $select.search"></div>
-            </ui-select-choices>
-        </ui-select>
-    </div>
-    <div class="modal-footer">
-        <button class="btn btn-primary" ng-click="invite.invite()">Invite</button>
-        <button class="btn btn-warning" ng-click="invite.cancel()">Cancel</button>
+<!--  TODO - not using controllerAs because ionic modal 1.x does not support it -->
+<div class="modal">
+    <div class="invite-friends">
+        <ion-header-bar>
+            <h1 class="title">Invite Friends!</h1>
+        </ion-header-bar>
+        <ion-content>
+            <div class="list">
+                <label class="item item-input">
+                    <div style="width: 100%;">
+                        <div class="input-label">
+                            Friends To Invite:
+                        </div>
+                    </div>
+                </label>
+
+                <div angular-multi-select
+                     class="ams_container"
+                     min-search-length="1"
+                     helper-elements="filter noall nonone noreset"
+                     input-model="invitableFriends"
+                     output-model="friendsToInvite"
+                     button-template="angular-multi-select-btn-data.htm"
+                     item-label="<[ name ]>"
+                     search-property="name"
+                     button-label="<[ name ]>">
+                </div>
+            </div>
+            <a class="button button-full button-submit" ng-click="inviteFriends(friendsToInvite)">
+                Invite
+            </a>
+            <a class="button button-full button-quit" ng-click="cancelInviteFriends()">Cancel</a>
+        </ion-content>
     </div>
 </div>
