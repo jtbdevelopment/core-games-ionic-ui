@@ -327,6 +327,189 @@ angular.module('coreGamesIonicUi.services').run(
 );
 'use strict';
 
+/**
+ * Error Handling
+ * --------------
+ * To change look of dialog - override path to template with setErrorDialogHTMLTemplate
+ * OR
+ * override error handler with setErrorHandler which takes 1 param with error message
+ *
+ * Actions Requiring Confirmation
+ * ------------------------------
+ * To change look of dialog - override path to template with setConfirmDialogHTMLTemplate
+ *
+ * Game Specific Actions
+ * ---------------------
+ * You can use wrapActionOnGame and wrapConfirmedActionOnGame to create standard handlers for game calls,
+ * cache interaction and error handling
+ */
+angular.module('coreGamesIonicUi.services').factory('jtbIonicGameActions',
+    ['$http', '$q', '$state', '$ionicPopup', '$ionicActionSheet', 'jtbGameCache',
+        'jtbPlayerService', '$ionicLoading', 'jtbIonicAds',
+        function ($http, $q, $state, $ionicPopup, $ionicActionSheet, jtbGameCache,
+                  jtbPlayerService, $ionicLoading, jtbIonicAds) {
+
+            function defaultErrorCallback(errorMessage, promise) {
+                $ionicPopup.alert({
+                    title: 'Problem making move!',
+                    template: errorMessage
+                }).then(function () {
+                    promise.reject();
+                });
+            }
+
+            var errorHandler = defaultErrorCallback;
+
+            //  TODO - ads in ionic
+            var defaultAdHandler = jtbIonicAds.showInterstitial;
+
+            function gameURL(game) {
+                return jtbPlayerService.currentPlayerBaseURL() + '/game/' + game.id + '/';
+            }
+
+            function showSending() {
+                $ionicLoading.show({
+                    template: 'Sending...'
+                });
+            }
+
+            function hideSending() {
+                $ionicLoading.hide();
+            }
+
+            function generalizeTakeActionPromiseHandler(httpPromise) {
+                var promise = $q.defer();
+                showSending();
+                httpPromise.then(
+                    function (response) {
+                        var updatedGame = response.data;
+                        hideSending();
+                        jtbGameCache.putUpdatedGame(updatedGame);
+                        promise.resolve(updatedGame);
+                    },
+                    function (response) {
+                        console.error(response.data + '/' + response.status);
+                        hideSending();
+                        errorHandler(response.data, promise);
+                    }
+                );
+                return promise.promise;
+            }
+
+            function generalizedConfirmedTakeHttpAction(confirmMessage, httpActionCB) {
+                var promise = $q.defer();
+                $ionicActionSheet.show({
+                    buttons: [],
+                    destructiveText: confirmMessage,
+                    titleText: 'Are you sure?',
+                    cancelText: 'Cancel',
+                    cancel: function() {
+                        promise.reject();
+                    },
+                    destructiveButtonClicked: function () {
+                        generalizeTakeActionPromiseHandler(httpActionCB()).then(function (updatedGame) {
+                            promise.resolve(updatedGame);
+                        }, function () {
+                            promise.reject();
+                        });
+                    }
+                });
+
+                return promise.promise;
+            }
+
+
+            function standardHttpAction(game, action) {
+                return $http.put(gameURL(game) + action);
+            }
+
+            function generateAd(adHandler) {
+                if (angular.isUndefined(adHandler)) {
+                    adHandler = defaultAdHandler;
+                }
+                return adHandler();
+            }
+
+            var service = {
+                //  Override error handler
+                getErrorHandler: function () {
+                    return errorHandler;
+                },
+
+                setErrorHandler: function (cb) {
+                    errorHandler = cb;
+                },
+
+
+                //  Helpers for defining game specific actions
+                getGameURL: function (game) {
+                    return gameURL(game);
+                },
+                wrapActionOnGame: function (httpActionCB) {
+                    return generalizeTakeActionPromiseHandler(httpActionCB);
+                },
+                wrapConfirmedActionOnGame: function (confirmMessage, httpActionCB) {
+                    return generalizedConfirmedTakeHttpAction(confirmMessage, httpActionCB);
+                },
+
+                //  Standard actions
+
+                //  adHandler will default if undefined
+                new: function (options, adHandler) {
+                    generateAd(adHandler).then(function () {
+                        service.wrapActionOnGame($http.post(
+                            jtbPlayerService.currentPlayerBaseURL() + '/new',
+                            options)).then(
+                            function (game) {
+                                $state.go('app.' + game.gamePhase.toLowerCase(), {gameID: game.id});
+                            }
+                        );
+                    });
+                },
+
+                //  adHandler will default if undefined
+                accept: function (game, adHandler) {
+                    generateAd(adHandler).then(function () {
+                        service.wrapActionOnGame(standardHttpAction(game, 'accept'));
+                    });
+                },
+
+                reject: function (game) {
+                    service.wrapConfirmedActionOnGame('Reject this game!', function () {
+                        return standardHttpAction(game, 'reject');
+                    });
+                },
+
+                declineRematch: function (game) {
+                    service.wrapConfirmedActionOnGame('Decline further rematches.', function () {
+                        return standardHttpAction(game, 'endRematch');
+                    });
+                },
+
+                //  adHandler will default if undefined
+                rematch: function (game, adHandler) {
+                    generateAd(adHandler).then(function () {
+                        service.wrapActionOnGame(standardHttpAction(game, 'rematch')).then(function (game) {
+                            $state.go('app.' + game.gamePhase.toLowerCase(), {gameID: game.id});
+                        });
+                    });
+                },
+
+                quit: function (game) {
+                    service.wrapConfirmedActionOnGame('Quit this game!', function () {
+                        return standardHttpAction(game, 'quit');
+                    });
+                }
+            };
+            return service;
+        }
+    ]
+);
+
+
+
+'use strict';
+
 angular.module('coreGamesIonicUi.services').service('jtbIonicInviteFriends',
     ['$ionicModal', '$rootScope', 'jtbFacebook',
         function ($ionicModal, $rootScope, jtbFacebook) {
@@ -513,10 +696,10 @@ angular.module('coreGamesIonicUi.services').factory('jtbIonicVersionNotesService
 );
 angular.module('coreGamesIonicUi.templates').run(['$templateCache', function($templateCache) {$templateCache.put('templates/core-ionic/actions/action-confirm-dialog.html','<!--  TODO --><div class="game-confirm-dialog"><div class="modal-header"><h4 class="modal-title">{{confirmDialog.confirmMessage}}</h4></div><div class="modal-body"><span class="confirm-message">Are you sure?</span></div><div class="modal-footer"><button class="btn btn-default btn-danger action-button" ng-click="confirmDialog.takeAction()">Yes</button> <button class="btn btn-default btn-default btn-default-focus cancel-button" ng-click="confirmDialog.cancelAction()">No</button></div></div>');
 $templateCache.put('templates/core-ionic/actions/action-error-dialog.html','<!--  TODO --><div class="game-error-dialog" role="dialog"><div class="modal-header"><h4 class="modal-title">Sorry!</h4></div><div class="modal-body"><span class="error-message">{{errorDialog.errorMessage}}</span></div><div class="modal-footer"><button class="btn btn-default btn-info btn-default-focus close-button" ng-click="errorDialog.closeError()">OK</button></div></div>');
-$templateCache.put('templates/core-ionic/friends/invite-friends.html','<!--  TODO - not using controllerAs because ionic modal 1.x does not support it --><div class="modal"><div class="invite-friends"><ion-header-bar><h1 class="title">Invite Friends!</h1></ion-header-bar><ion-content><div class="list"><label class="item item-input"><div style="width: 100%"><div class="input-label">Friends To Invite:</div></div></label><div angular-multi-select class="ams_container" min-search-length="1" helper-elements="filter noall nonone noreset" input-model="invitableFriends" output-model="friendsToInvite" button-template="angular-multi-select-btn-data.htm" item-label="<[ name ]>" search-property="name" button-label="<[ name ]>"></div></div><a class="button button-full button-submit" ng-click="inviteFriends(friendsToInvite)">Invite </a><a class="button button-full button-quit" ng-click="cancelInviteFriends()">Cancel</a></ion-content></div></div>');
 $templateCache.put('templates/core-ionic/admin/admin-stats.html','<div class="admin-stats"><div class="row text-right"><div class="col"></div><div class="col">Last 24 hours</div><div class="col">Last 7 days</div><div class="col">Last 30 days</div></div><div class="row text-right"><div class="col-25 text-left">Total Games</div><div class="col-75">{{admin.gameCount}}</div></div><div class="row text-right"><div class="col text-left">Games Created</div><div class="col">{{admin.gamesLast24hours}}</div><div class="col">{{admin.gamesLast7days}}</div><div class="col">{{admin.gamesLast30days}}</div></div><div class="row text-right"><div class="col-25 text-left">Total Players</div><div class="col-75">{{admin.playerCount}}</div></div><div class="row text-right"><div class="col text-left">Players Created</div><div class="col">{{admin.playersCreated24hours}}</div><div class="col">{{admin.playersCreated7days}}</div><div class="col">{{admin.playersCreated30days}}</div></div><div class="row text-right"><div class="col text-left">Players Logged In</div><div class="col">{{admin.playersLastLogin24hours}}</div><div class="col">{{admin.playersLastLogin7days}}</div><div class="col">{{admin.playersLastLogin30days}}</div></div></div>');
 $templateCache.put('templates/core-ionic/admin/admin-switch-player.html','<div class="admin-user"><div class="row row-center"><div class="col-25"><button class="button button-full button-positive button-stop-simulating" ng-disabled="!admin.revertEnabled" ng-click="admin.revertToNormal()">Stop</button></div><div class="col-75">{{admin.revertText}}</div></div><div class="row row-center"><div class="col-25"><button class="button button-full button-energized button-get-users" ng-click="admin.refreshData()">Get Users</button></div><div class="col-75"><div class="list"><label class="item item-input"><input type="text" ng-model="admin.searchText" placeholder="And Name contains.."></label></div></div></div><div class="item item-divider"><div class="row"><div class="col-50">Display Name</div><div class="col-25">ID</div><div class="col-25">Switch</div></div></div><div class="item" ng-repeat="player in admin.players"><div class="row row-center"><div class="col-50">{{player.displayName}}</div><div class="col-25">{{player.id}}</div><div class="col-25"><button class="button button-full button-assertive button-change-user" ng-click="admin.switchToPlayer(player.id)">Switch</button></div></div></div><div class="row"><div class="col-10">{{admin.currentPage}} of {{admin.numberOfPages}}</div><div class="col-90"><div class="item range range-positive"><input type="range" name="currentPage" min="1" max="{{admin.numberOfPages}}" ng-model="admin.currentPage" ng-change="admin.changePage()"></div></div></div></div>');
 $templateCache.put('templates/core-ionic/admin/admin.html','<ion-view class="admin-screen"><ion-content class="has-header" ng-cloak><div class="row"><div class="col-50"><a class="button-full button {{main.adminShowStats ? \'selected\' : \'\'}}" ng-click="main.adminSwitchToStats()">Stats</a></div><div class="col-50"><a class="button-full button {{main.adminShowSwitch ? \'selected\' : \'\'}}" ng-click="main.adminSwitchToSwitchPlayer()">Switch Player</a></div></div><div ng-show="main.adminShowStats"><div ng-include="\'templates/core-ionic/admin/admin-stats.html\'"></div></div><div ng-show="main.adminShowSwitch"><div ng-include="\'templates/core-ionic/admin/admin-switch-player.html\'"></div></div></ion-content></ion-view>');
+$templateCache.put('templates/core-ionic/friends/invite-friends.html','<!--  TODO - not using controllerAs because ionic modal 1.x does not support it --><div class="modal"><div class="invite-friends"><ion-header-bar><h1 class="title">Invite Friends!</h1></ion-header-bar><ion-content><div class="list"><label class="item item-input"><div style="width: 100%"><div class="input-label">Friends To Invite:</div></div></label><div angular-multi-select class="ams_container" min-search-length="1" helper-elements="filter noall nonone noreset" input-model="invitableFriends" output-model="friendsToInvite" button-template="angular-multi-select-btn-data.htm" item-label="<[ name ]>" search-property="name" button-label="<[ name ]>"></div></div><a class="button button-full button-submit" ng-click="inviteFriends(friendsToInvite)">Invite </a><a class="button button-full button-quit" ng-click="cancelInviteFriends()">Cancel</a></ion-content></div></div>');
 $templateCache.put('templates/core-ionic/sign-in/network.html','<ion-view><ion-content class="network"><div><div class="row text-center"><div class="center"><p>{{network.message}}</p></div></div></div></ion-content></ion-view>');
 $templateCache.put('templates/core-ionic/sign-in/sign-in.html','<ion-view><ion-content class="sign-in" ng-cloak><div class="row text-center"><div class="center"><p>{{signIn.message}}</p></div></div><div class="list" ng-show="signIn.showFacebook"><a class="item item-button" href="#" ng-click="signIn.fbLogin()"><img ng-src="images/sign-in-with-facebook.png"></a></div><div class="list" ng-show="signIn.showManual"><span class="item item-divider">Don\'t want to login with Facebook?</span><label class="item item-input"><span class="input-label">Email</span> <input id="username" name="username" type="email" size="25" ng-model="signIn.manualForm.username"></label><label class="item item-input"><span class="input-label">Password</span> <input id="password" name="password" type="password" size="25" ng-model="signIn.manualForm.password"></label><ion-toggle ng-model="signIn.manualForm.rememberMe">Remember Me?</ion-toggle><a class="button-full button-submit button" ng-click="signIn.manualLogin(username, password)">Login</a></div></ion-content></ion-view>');
 $templateCache.put('templates/core-ionic/sign-in/signed-in.html','<ion-view><ion-content class="signed-in"><div><div class="row text-center"><div class="center"><p>Login successful...</p></div></div></div></ion-content></ion-view>');}]);
