@@ -253,8 +253,8 @@ angular.module('coreGamesIonicUi.interceptors').factory('jtbApiEndpointIntercept
 'use strict';
 
 angular.module('coreGamesIonicUi.services').factory('jtbIonicAds',
-    ['$cordovaGoogleAds', '$cordovaDevice',
-        function ($cordovaGoogleAds, $cordovaDevice) {
+    ['$cordovaGoogleAds', '$cordovaDevice', '$q',
+        function ($cordovaGoogleAds, $cordovaDevice, $q) {
             var DEFAULT_TIME_BETWEEN_INTERSTITIALS = 2 * 60 * 1000;  // 2 minutes
             var IOS = 'iOS';
             var BROWSER = 'browser';
@@ -374,30 +374,40 @@ angular.module('coreGamesIonicUi.services').factory('jtbIonicAds',
                 },
 
                 showInterstitial: function () {
+                    var p = $q.defer();
                     if (((new Date()) - lastInterstitialShown ) >= timeBetweenInterstitials) {
                         switch (platform) {
                             case IOS:
                             case ANDROID:
                                 try {
-                                    $cordovaGoogleAds.showInterstitial();
+                                    $cordovaGoogleAds.showInterstitial().then(function() {
+                                        p.resolve();
+                                    }, function() {
+                                        p.resolve();
+                                    });
                                 } catch (ex) {
                                     console.warn(JSON.stringify(ex));
                                     requestAdMobInterstitialAd();
+                                    p.resolve();
                                 }
                                 break;
                             case BROWSER:
                                 try {
                                     invokeApplixirVideoUnitExtended(false, 'middle', function () {
                                         lastInterstitialShown = new Date();
+                                        p.resolve();
                                     });
                                 } catch (ex) {
                                     console.warn(JSON.stringify(ex));
+                                    p.resolve();
                                 }
                                 break;
                             default:
+                                p.resolve();
                                 break;
                         }
                     }
+                    return p.promise;
                 }
             };
         }
