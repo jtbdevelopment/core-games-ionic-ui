@@ -51,8 +51,10 @@ describe('Service: jtbIonicAds', function () {
         }]);
     }));
 
-    var service;
-    beforeEach(inject(function ($injector) {
+    var service, $rootScope, $q;
+    beforeEach(inject(function ($injector, _$rootScope_, _$q_) {
+        $rootScope = _$rootScope_;
+        $q = _$q_;
         googleAdSpy = {};
         googleAdSpy.prepareInterstitial = jasmine.createSpy();
         googleAdSpy.createBanner = jasmine.createSpy();
@@ -77,21 +79,52 @@ describe('Service: jtbIonicAds', function () {
 
             it('show interstitial first time', function () {
                 window.invokeApplixirVideoUnitExtended = jasmine.createSpy();
-                service.showInterstitial();
-                // can't test callback function
-                expect(window.invokeApplixirVideoUnitExtended).toHaveBeenCalledWith(false, 'middle', jasmine.any(Function));
-                expect(window.invokeApplixirVideoUnitExtended.calls.count()).toEqual(1);
-            });
-
-            it('show interstitial rapidly after first time does nothing second time', function () {
-                window.invokeApplixirVideoUnitExtended = jasmine.createSpy();
-                service.showInterstitial();
+                var count = 0;
+                service.showInterstitial().then(function() {
+                    count += 1;
+                });
                 // can't test callback function
                 expect(window.invokeApplixirVideoUnitExtended).toHaveBeenCalledWith(false, 'middle', jasmine.any(Function));
                 expect(window.invokeApplixirVideoUnitExtended.calls.count()).toEqual(1);
                 window.invokeApplixirVideoUnitExtended.calls.argsFor(0)[2]();
-                service.showInterstitial();
+                $rootScope.$apply();
+                expect(count).toEqual(1);
+            });
+
+            it('resolves even if exception', function () {
+                window.invokeApplixirVideoUnitExtended = jasmine.createSpy();
+                var count = 0;
+                window.invokeApplixirVideoUnitExtended.and.throwError('ack');
+                service.showInterstitial().then(function() {
+                    count += 1;
+                });
+                // can't test callback function
+                expect(window.invokeApplixirVideoUnitExtended).toHaveBeenCalledWith(false, 'middle', jasmine.any(Function));
                 expect(window.invokeApplixirVideoUnitExtended.calls.count()).toEqual(1);
+                window.invokeApplixirVideoUnitExtended.calls.argsFor(0)[2]();
+                $rootScope.$apply();
+                expect(count).toEqual(1);
+            });
+
+            it('show interstitial rapidly after first time does nothing second time', function () {
+                window.invokeApplixirVideoUnitExtended = jasmine.createSpy();
+                var count = 0;
+                service.showInterstitial().then(function() {
+                    count += 1;
+                });
+                // can't test callback function
+                expect(window.invokeApplixirVideoUnitExtended).toHaveBeenCalledWith(false, 'middle', jasmine.any(Function));
+                expect(window.invokeApplixirVideoUnitExtended.calls.count()).toEqual(1);
+                window.invokeApplixirVideoUnitExtended.calls.argsFor(0)[2]();
+                window.invokeApplixirVideoUnitExtended.calls.argsFor(0)[2]();
+                $rootScope.$apply();
+                expect(count).toEqual(1);
+                service.showInterstitial().then(function() {
+                    count += 1;
+                });
+                expect(window.invokeApplixirVideoUnitExtended.calls.count()).toEqual(1);
+                $rootScope.$apply();
+                expect(count).toEqual(2);
             });
         });
     });
@@ -119,6 +152,7 @@ describe('Service: jtbIonicAds', function () {
         document.dispatchEvent(event);
     }
 
+    //noinspection JSUnusedGlobalSymbols
     var generator = {
         generateOnAdDismiss: function (adType) {
             generateOnAdXXX('onAdDismiss', adType);
@@ -198,22 +232,69 @@ describe('Service: jtbIonicAds', function () {
                 });
 
                 it('show interstitial first time', function () {
-                    window.invokeApplixirVideoUnitExtended = jasmine.createSpy();
-                    service.showInterstitial();
+                    var count = 0;
+                    var p = $q.defer();
+                    googleAdSpy.showInterstitial.and.returnValue(p.promise);
+                    service.showInterstitial().then(function () {
+                        count += 1;
+                    });
                     expect(googleAdSpy.showInterstitial.calls.count()).toEqual(1);
                     expect(googleAdSpy.showInterstitial).toHaveBeenCalled();
+                    p.resolve();
+                    $rootScope.$apply();
+                    expect(count).toEqual(1);
+                });
+
+                it('resolves even if show is error', function () {
+                    var count = 0;
+                    var p = $q.defer();
+                    googleAdSpy.showInterstitial.and.returnValue(p.promise);
+                    service.showInterstitial().then(function () {
+                        count += 1;
+                    });
+                    expect(googleAdSpy.showInterstitial.calls.count()).toEqual(1);
+                    expect(googleAdSpy.showInterstitial).toHaveBeenCalled();
+                    p.reject();
+                    $rootScope.$apply();
+                    expect(count).toEqual(1);
+                });
+
+                it('resolves even if show is exceptions', function () {
+                    var count = 0;
+                    googleAdSpy.showInterstitial.and.throwError('ack');
+                    service.showInterstitial().then(function () {
+                        count += 1;
+                    });
+                    expect(googleAdSpy.showInterstitial.calls.count()).toEqual(1);
+                    expect(googleAdSpy.showInterstitial).toHaveBeenCalled();
+                    $rootScope.$apply();
+                    expect(count).toEqual(1);
                 });
 
                 it('show interstitial rapidly after first time does nothing second time', function () {
-                    window.invokeApplixirVideoUnitExtended = jasmine.createSpy();
-                    service.showInterstitial();
+                    var count = 0;
+                    var p = $q.defer();
+                    googleAdSpy.showInterstitial.and.returnValue(p.promise);
+                    service.showInterstitial().then(function () {
+                        count += 1;
+                    });
+                    p.resolve();
+                    $rootScope.$apply();
                     expect(googleAdSpy.showInterstitial.calls.count()).toEqual(1);
                     expect(googleAdSpy.showInterstitial).toHaveBeenCalled();
+                    expect(count).toEqual(1);
 
                     generator.generateOnAdDismiss(INTERSTITIAL);
 
-                    service.showInterstitial();
+                    p = $q.defer();
+                    googleAdSpy.showInterstitial.and.returnValue(p.promise);
+                    service.showInterstitial().then(function () {
+                        count += 1;
+                    });
+                    p.resolve();
+                    $rootScope.$apply();
                     expect(googleAdSpy.showInterstitial.calls.count()).toEqual(1);
+                    expect(count).toEqual(2);
                 });
             });
         });

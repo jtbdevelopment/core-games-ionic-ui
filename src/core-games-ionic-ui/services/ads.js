@@ -41,7 +41,7 @@ angular.module('coreGamesIonicUi.services').factory('jtbIonicAds',
              }
              });
              */
-            
+
             document.addEventListener('onAdDismiss', function (e) {
                 if (e.adType === 'interstitial') {
                     lastInterstitialShown = new Date();
@@ -76,7 +76,7 @@ angular.module('coreGamesIonicUi.services').factory('jtbIonicAds',
                 //     }
                 //  }
                 initialize: function (ids, timeBetweenInterstitialsInSeconds) {
-                    if(angular.isDefined(timeBetweenInterstitialsInSeconds)) {
+                    if (angular.isDefined(timeBetweenInterstitialsInSeconds)) {
                         timeBetweenInterstitials = timeBetweenInterstitialsInSeconds * 1000;
                     }
                     if (!initialized) {
@@ -116,8 +116,6 @@ angular.module('coreGamesIonicUi.services').factory('jtbIonicAds',
                                     fjs.parentNode.insertBefore(js, fjs);
                                 }(document, 'script', 'applixir-jssdk'));
                                 break;
-                            default:
-                                break;
                         }
                         initialized = true;
                     }
@@ -130,9 +128,9 @@ angular.module('coreGamesIonicUi.services').factory('jtbIonicAds',
                             case IOS:
                             case ANDROID:
                                 try {
-                                    $cordovaGoogleAds.showInterstitial().then(function() {
+                                    $cordovaGoogleAds.showInterstitial().then(function () {
                                         p.resolve();
-                                    }, function() {
+                                    }, function () {
                                         p.resolve();
                                     });
                                 } catch (ex) {
@@ -141,7 +139,7 @@ angular.module('coreGamesIonicUi.services').factory('jtbIonicAds',
                                     p.resolve();
                                 }
                                 break;
-                            case BROWSER:
+                            default:
                                 try {
                                     invokeApplixirVideoUnitExtended(false, 'middle', function () {
                                         lastInterstitialShown = new Date();
@@ -151,9 +149,6 @@ angular.module('coreGamesIonicUi.services').factory('jtbIonicAds',
                                     console.warn(JSON.stringify(ex));
                                     p.resolve();
                                 }
-                                break;
-                            default:
-                                p.resolve();
                                 break;
                         }
                     } else {
