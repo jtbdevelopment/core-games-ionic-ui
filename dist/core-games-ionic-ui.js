@@ -248,6 +248,162 @@ angular.module('coreGamesIonicUi.interceptors').factory('jtbApiEndpointIntercept
     }]);
 
 
+/*global invokeApplixirVideoUnitExtended:false */
+/*global AdMob:false */
+'use strict';
+
+angular.module('coreGamesIonicUi.services').factory('jtbIonicAds',
+    ['$cordovaGoogleAds', '$cordovaDevice',
+        function ($cordovaGoogleAds, $cordovaDevice) {
+            var DEFAULT_TIME_BETWEEN_INTERSTITIALS = 2 * 60 * 1000;  // 2 minutes
+            var IOS = 'iOS';
+            var BROWSER = 'browser';
+            var ANDROID = 'Android';
+
+            var lastInterstitialShown = new Date(0);
+            var timeBetweenInterstitials = DEFAULT_TIME_BETWEEN_INTERSTITIALS;
+            var platform = '';
+            var adMobInterstitialId = '';
+            var initialized = false;
+
+            function requestAdMobInterstitialAd() {
+                $cordovaGoogleAds.prepareInterstitial({adId: adMobInterstitialId, autoShow: false});
+            }
+
+            //  Admob
+
+            //  Debugging 
+            /*
+             document.addEventListener('onAdLoaded', function (e) {
+             try {
+             console.info('Ad Loaded:' + JSON.stringify(e));
+             } catch (ex) {
+             console.info('Ad Loaded, not serializable');
+             }
+
+             });
+
+             document.addEventListener('onAdPresent', function (e) {
+             try {
+             console.info('Ad Present:' + JSON.stringify(e));
+             } catch (ex) {
+             console.info('Ad Present, not serializable');
+             }
+             });
+             */
+            
+            document.addEventListener('onAdDismiss', function (e) {
+                if (e.adType === 'interstitial') {
+                    lastInterstitialShown = new Date();
+                    requestAdMobInterstitialAd();
+                }
+            });
+
+            document.addEventListener('onAdFailLoad', function (e) {
+                if (e.adType === 'interstitial') {
+                    requestAdMobInterstitialAd();
+                }
+            });
+
+            //  they clicked on ad
+            document.addEventListener('onAdLeaveApp', function (e) {
+                if (e.adType === 'interstitial') {
+                    requestAdMobInterstitialAd();
+                }
+            });
+
+            return {
+                //
+                //  ids should be structure like
+                //  ids: {
+                //     ios: {
+                //         banner: 'ccccc',
+                //         interstitial: 'xxxx'
+                //     },
+                //     android: {
+                //         banner: 'cccdd',
+                //         interstitial: 'zzxx'
+                //     }
+                //  }
+                initialize: function (ids, timeBetweenInterstitialsInSeconds) {
+                    if(angular.isDefined(timeBetweenInterstitialsInSeconds)) {
+                        timeBetweenInterstitials = timeBetweenInterstitialsInSeconds * 1000;
+                    }
+                    if (!initialized) {
+                        try {
+                            platform = $cordovaDevice.getPlatform();
+                        } catch (ex) {
+                            platform = BROWSER;
+                        }
+                        switch (platform) {
+                            case IOS:
+                                adMobInterstitialId = ids.ios.interstitial;
+                                requestAdMobInterstitialAd();
+                                $cordovaGoogleAds.createBanner({
+                                    adId: ids.ios.banner,
+                                    position: AdMob.AD_POSITION.BOTTOM_CENTER,
+                                    autoShow: true
+                                });
+                                break;
+                            case ANDROID:
+                                adMobInterstitialId = ids.android.interstitial;
+                                requestAdMobInterstitialAd();
+                                $cordovaGoogleAds.createBanner({
+                                    adId: ids.android.banner,
+                                    position: AdMob.AD_POSITION.BOTTOM_CENTER,
+                                    autoShow: true
+                                });
+                                break;
+                            case BROWSER:
+                                (function (d, s, id) {
+                                    var js, fjs = d.getElementsByTagName(s)[0];
+                                    if (d.getElementById(id)) {
+                                        return;
+                                    }
+                                    js = d.createElement(s);
+                                    js.id = id;
+                                    js.src = '//developer.appprizes.com/applixir_richmedia.js';
+                                    fjs.parentNode.insertBefore(js, fjs);
+                                }(document, 'script', 'applixir-jssdk'));
+                                break;
+                            default:
+                                break;
+                        }
+                        initialized = true;
+                    }
+                },
+
+                showInterstitial: function () {
+                    if (((new Date()) - lastInterstitialShown ) >= timeBetweenInterstitials) {
+                        switch (platform) {
+                            case IOS:
+                            case ANDROID:
+                                try {
+                                    $cordovaGoogleAds.showInterstitial();
+                                } catch (ex) {
+                                    console.warn(JSON.stringify(ex));
+                                    requestAdMobInterstitialAd();
+                                }
+                                break;
+                            case BROWSER:
+                                try {
+                                    invokeApplixirVideoUnitExtended(false, 'middle', function () {
+                                        lastInterstitialShown = new Date();
+                                    });
+                                } catch (ex) {
+                                    console.warn(JSON.stringify(ex));
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            };
+        }
+    ]
+);
+
 'use strict';
 
 angular.module('coreGamesIonicUi.services').run(
@@ -694,9 +850,7 @@ angular.module('coreGamesIonicUi.services').factory('jtbIonicVersionNotesService
         }
     ]
 );
-angular.module('coreGamesIonicUi.templates').run(['$templateCache', function($templateCache) {$templateCache.put('templates/core-ionic/actions/action-confirm-dialog.html','<!--  TODO --><div class="game-confirm-dialog"><div class="modal-header"><h4 class="modal-title">{{confirmDialog.confirmMessage}}</h4></div><div class="modal-body"><span class="confirm-message">Are you sure?</span></div><div class="modal-footer"><button class="btn btn-default btn-danger action-button" ng-click="confirmDialog.takeAction()">Yes</button> <button class="btn btn-default btn-default btn-default-focus cancel-button" ng-click="confirmDialog.cancelAction()">No</button></div></div>');
-$templateCache.put('templates/core-ionic/actions/action-error-dialog.html','<!--  TODO --><div class="game-error-dialog" role="dialog"><div class="modal-header"><h4 class="modal-title">Sorry!</h4></div><div class="modal-body"><span class="error-message">{{errorDialog.errorMessage}}</span></div><div class="modal-footer"><button class="btn btn-default btn-info btn-default-focus close-button" ng-click="errorDialog.closeError()">OK</button></div></div>');
-$templateCache.put('templates/core-ionic/admin/admin-stats.html','<div class="admin-stats"><div class="row text-right"><div class="col"></div><div class="col">Last 24 hours</div><div class="col">Last 7 days</div><div class="col">Last 30 days</div></div><div class="row text-right"><div class="col-25 text-left">Total Games</div><div class="col-75">{{admin.gameCount}}</div></div><div class="row text-right"><div class="col text-left">Games Created</div><div class="col">{{admin.gamesLast24hours}}</div><div class="col">{{admin.gamesLast7days}}</div><div class="col">{{admin.gamesLast30days}}</div></div><div class="row text-right"><div class="col-25 text-left">Total Players</div><div class="col-75">{{admin.playerCount}}</div></div><div class="row text-right"><div class="col text-left">Players Created</div><div class="col">{{admin.playersCreated24hours}}</div><div class="col">{{admin.playersCreated7days}}</div><div class="col">{{admin.playersCreated30days}}</div></div><div class="row text-right"><div class="col text-left">Players Logged In</div><div class="col">{{admin.playersLastLogin24hours}}</div><div class="col">{{admin.playersLastLogin7days}}</div><div class="col">{{admin.playersLastLogin30days}}</div></div></div>');
+angular.module('coreGamesIonicUi.templates').run(['$templateCache', function($templateCache) {$templateCache.put('templates/core-ionic/admin/admin-stats.html','<div class="admin-stats"><div class="row text-right"><div class="col"></div><div class="col">Last 24 hours</div><div class="col">Last 7 days</div><div class="col">Last 30 days</div></div><div class="row text-right"><div class="col-25 text-left">Total Games</div><div class="col-75">{{admin.gameCount}}</div></div><div class="row text-right"><div class="col text-left">Games Created</div><div class="col">{{admin.gamesLast24hours}}</div><div class="col">{{admin.gamesLast7days}}</div><div class="col">{{admin.gamesLast30days}}</div></div><div class="row text-right"><div class="col-25 text-left">Total Players</div><div class="col-75">{{admin.playerCount}}</div></div><div class="row text-right"><div class="col text-left">Players Created</div><div class="col">{{admin.playersCreated24hours}}</div><div class="col">{{admin.playersCreated7days}}</div><div class="col">{{admin.playersCreated30days}}</div></div><div class="row text-right"><div class="col text-left">Players Logged In</div><div class="col">{{admin.playersLastLogin24hours}}</div><div class="col">{{admin.playersLastLogin7days}}</div><div class="col">{{admin.playersLastLogin30days}}</div></div></div>');
 $templateCache.put('templates/core-ionic/admin/admin-switch-player.html','<div class="admin-user"><div class="row row-center"><div class="col-25"><button class="button button-full button-positive button-stop-simulating" ng-disabled="!admin.revertEnabled" ng-click="admin.revertToNormal()">Stop</button></div><div class="col-75">{{admin.revertText}}</div></div><div class="row row-center"><div class="col-25"><button class="button button-full button-energized button-get-users" ng-click="admin.refreshData()">Get Users</button></div><div class="col-75"><div class="list"><label class="item item-input"><input type="text" ng-model="admin.searchText" placeholder="And Name contains.."></label></div></div></div><div class="item item-divider"><div class="row"><div class="col-50">Display Name</div><div class="col-25">ID</div><div class="col-25">Switch</div></div></div><div class="item" ng-repeat="player in admin.players"><div class="row row-center"><div class="col-50">{{player.displayName}}</div><div class="col-25">{{player.id}}</div><div class="col-25"><button class="button button-full button-assertive button-change-user" ng-click="admin.switchToPlayer(player.id)">Switch</button></div></div></div><div class="row"><div class="col-10">{{admin.currentPage}} of {{admin.numberOfPages}}</div><div class="col-90"><div class="item range range-positive"><input type="range" name="currentPage" min="1" max="{{admin.numberOfPages}}" ng-model="admin.currentPage" ng-change="admin.changePage()"></div></div></div></div>');
 $templateCache.put('templates/core-ionic/admin/admin.html','<ion-view class="admin-screen"><ion-content class="has-header" ng-cloak><div class="row"><div class="col-50"><a class="button-full button {{main.adminShowStats ? \'selected\' : \'\'}}" ng-click="main.adminSwitchToStats()">Stats</a></div><div class="col-50"><a class="button-full button {{main.adminShowSwitch ? \'selected\' : \'\'}}" ng-click="main.adminSwitchToSwitchPlayer()">Switch Player</a></div></div><div ng-show="main.adminShowStats"><div ng-include="\'templates/core-ionic/admin/admin-stats.html\'"></div></div><div ng-show="main.adminShowSwitch"><div ng-include="\'templates/core-ionic/admin/admin-switch-player.html\'"></div></div></ion-content></ion-view>');
 $templateCache.put('templates/core-ionic/friends/invite-friends.html','<!--  TODO - not using controllerAs because ionic modal 1.x does not support it --><div class="modal"><div class="invite-friends"><ion-header-bar><h1 class="title">Invite Friends!</h1></ion-header-bar><ion-content><div class="list"><label class="item item-input"><div style="width: 100%"><div class="input-label">Friends To Invite:</div></div></label><div angular-multi-select class="ams_container" min-search-length="1" helper-elements="filter noall nonone noreset" input-model="invitableFriends" output-model="friendsToInvite" button-template="angular-multi-select-btn-data.htm" item-label="<[ name ]>" search-property="name" button-label="<[ name ]>"></div></div><a class="button button-full button-submit" ng-click="inviteFriends(friendsToInvite)">Invite </a><a class="button button-full button-quit" ng-click="cancelInviteFriends()">Cancel</a></ion-content></div></div>');
