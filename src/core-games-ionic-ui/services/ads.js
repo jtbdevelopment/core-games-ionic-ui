@@ -156,6 +156,8 @@ angular.module('coreGamesIonicUi.services').factory('jtbIonicAds',
                                 p.resolve();
                                 break;
                         }
+                    } else {
+                        p.resolve();
                     }
                     return p.promise;
                 }
